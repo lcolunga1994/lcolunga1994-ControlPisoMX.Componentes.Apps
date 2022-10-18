@@ -9,6 +9,7 @@
     using Models;
 
     using CoresModels = ControlPisoMX.Cores.Models;
+    using ProlecGE.ControlPisoMX.BFWeb.Components;
 
     public class TestIndustrialCoreCommand : IRequest<IndustrialCoreTestResultModel>
     {
@@ -27,7 +28,8 @@
             double temperature,
             double watts,
             double coreTemperature,
-            string? stationId)
+            string? stationId,
+            string idSub)
         {
             ItemId = itemId;
             Batch = batch;
@@ -42,6 +44,7 @@
             Watts = watts;
             CoreTemperature = coreTemperature;
             StationId = stationId;
+            IdSub = idSub;
         }
 
         #endregion
@@ -73,6 +76,8 @@
         public double CoreTemperature { get; set; }
 
         public string? StationId { get; set; }
+        
+        public string IdSub { get; set; }
 
         #endregion
     }
@@ -82,14 +87,16 @@
         #region Fields
 
         private readonly ControlPisoMX.Cores.IMicroservice cores;
+        private readonly AppSettings _appSettings;
 
         #endregion
 
         #region Constructor
 
-        public TestIndustrialCoreCommandHandler(ControlPisoMX.Cores.IMicroservice cores)
+        public TestIndustrialCoreCommandHandler(ControlPisoMX.Cores.IMicroservice cores, AppSettings _appSettings)
         {
             this.cores = cores;
+            this._appSettings = _appSettings;
         }
 
         #endregion
@@ -100,21 +107,55 @@
             TestIndustrialCoreCommand request,
             CancellationToken cancellationToken)
         {
-            CoresModels.IndustrialCoreTestResultModel testResult = await cores.TestIndustrialCoreAsync(
-                request.ItemId,
-                request.Batch,
-                request.Serie,
-                request.CoreSize,
-                request.FoilWidth,
-                request.TestCode,
-                request.AverageVoltage,
-                request.RMSVoltage,
-                request.Current,
-                request.Temperature,
-                request.Watts,
-                request.CoreTemperature,
-                request.StationId,
-                cancellationToken);
+            //CoresModels.IndustrialCoreTestResultModel testResult = await cores.TestIndustrialCoreAsync(
+            //    request.ItemId,
+            //    request.Batch,
+            //    request.Serie,
+            //    request.CoreSize,
+            //    request.FoilWidth,
+            //    request.TestCode,
+            //    request.AverageVoltage,
+            //    request.RMSVoltage,
+            //    request.Current,
+            //    request.Temperature,
+            //    request.Watts,
+            //    request.CoreTemperature,
+            //    request.StationId,
+            //    cancellationToken);
+
+            CoresModels.IndustrialCoreTestResultModel testResult = _appSettings.AmbientERP ?
+                await cores.TestIndustrialCoreAsync(
+               request.ItemId,
+               request.Batch,
+               request.Serie,
+               request.CoreSize,
+               request.FoilWidth,
+               request.TestCode,
+               request.AverageVoltage,
+               request.RMSVoltage,
+               request.Current,
+               request.Temperature,
+               request.Watts,
+               request.CoreTemperature,
+               request.StationId,
+               request.IdSub,
+               cancellationToken)
+                : await cores.TestIndustrialCoreAsync_sqlctp(
+               request.ItemId,
+               request.Batch,
+               request.Serie,
+               request.CoreSize,
+               request.FoilWidth,
+               request.TestCode,
+               request.AverageVoltage,
+               request.RMSVoltage,
+               request.Current,
+               request.Temperature,
+               request.Watts,
+               request.CoreTemperature,
+               request.StationId,
+               request.IdSub,
+               cancellationToken);
 
             return await Task.FromResult(new IndustrialCoreTestResultModel(
                 testResult.ItemId,

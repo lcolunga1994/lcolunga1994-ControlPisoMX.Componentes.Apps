@@ -10,6 +10,7 @@
     using Residential.Models;
 
     using CoresModels = ControlPisoMX.Cores.Models;
+    using ProlecGE.ControlPisoMX.BFWeb.Components;
 
     public class TestResidentialCoreCommand : IRequest<ResidentialCoreTestResultModel>
     {
@@ -88,6 +89,8 @@
         private readonly ControlPisoMX.Cores.IMicroservice cores;
         private readonly ERP.IMicroservice erp;
         private readonly I40.IMicroservice i40;
+        private readonly LN.ITtxpcf925Repository ln;
+        private readonly AppSettings _appSettings;
 
         #endregion
 
@@ -96,11 +99,14 @@
         public TestResidentialCoreCommandHandler(
             ControlPisoMX.Cores.IMicroservice cores,
             ERP.IMicroservice erp,
-            I40.IMicroservice i40)
+            I40.IMicroservice i40,
+            LN.ITtxpcf925Repository ln, AppSettings _appSettings)
         {
             this.cores = cores;
             this.erp = erp;
             this.i40 = i40;
+            this.ln = ln;
+            this._appSettings = _appSettings;
         }
 
         #endregion
@@ -115,54 +121,108 @@
                 await GetItemAsync(request.ItemId, cancellationToken)
                 .ConfigureAwait(false);
 
-            ERP.Models.ItemVoltageDesignModel itemVoltageDesign =
+            if (_appSettings.AmbientERP)
+            {
+                ERP.Models.ItemVoltageDesignModel itemVoltageDesign =
                 await GetItemVoltageDesignAsync(item.ItemId, item.DesignId, request.CoreSize, cancellationToken)
                 .ConfigureAwait(false);
 
-            CoresModels.ResidentialCoreTestResultModel coreTestResult = await cores.TestResidentialCoreAsync(
-                    request.Tag,
-                    item.ItemId,
-                    item.DesignId,
-                    request.CoreSize,
-                    itemVoltageDesign.KVA,
-                    itemVoltageDesign.PrimaryVoltage,
-                    itemVoltageDesign.SecondaryVoltage,
-                    itemVoltageDesign.TestVoltage,
-                    itemVoltageDesign.Limits
-                        .Select(l => new CoresModels.ItemVoltageLimitModel(l.Color, l.Min, l.Max))
-                        .ToArray(),
-                    request.AverageVoltage,
-                    request.RMSVoltage,
-                    request.Current,
-                    request.Temperature,
-                    request.Watts,
-                    request.CoreTemperature,
-                    request.TestCode,
-                    request.StationId,
-                    cancellationToken)
+                CoresModels.ResidentialCoreTestResultModel coreTestResult = await cores.TestResidentialCoreAsync(
+                        request.Tag,
+                        item.ItemId,
+                        item.DesignId,
+                        request.CoreSize,
+                        itemVoltageDesign.KVA,
+                        itemVoltageDesign.PrimaryVoltage,
+                        itemVoltageDesign.SecondaryVoltage,
+                        itemVoltageDesign.TestVoltage,
+                        itemVoltageDesign.Limits
+                            .Select(l => new CoresModels.ItemVoltageLimitModel(l.Color, l.Min, l.Max))
+                            .ToArray(),
+                        request.AverageVoltage,
+                        request.RMSVoltage,
+                        request.Current,
+                        request.Temperature,
+                        request.Watts,
+                        request.CoreTemperature,
+                        request.TestCode,
+                        request.StationId,
+                        cancellationToken)
+                    .ConfigureAwait(false);
+
+                if (!string.IsNullOrWhiteSpace(request.Tag))
+                {
+                    await i40.SetCoreAsTestedAsync(request.Tag, cancellationToken).ConfigureAwait(false);
+                }
+
+                return new ResidentialCoreTestResultModel(
+                    coreTestResult.ItemId,
+                    coreTestResult.Batch,
+                    coreTestResult.Serie,
+                    coreTestResult.Sequence,
+                    (ProductLine)(int)coreTestResult.ProductLine,
+                    coreTestResult.TestCode,
+                    (CoreTestResult)(int)coreTestResult.Status,
+                    coreTestResult.CorrectedWatts,
+                    coreTestResult.NewWatts,
+                    coreTestResult.CurrentPercentage,
+                    (CoreLimitColor)(int)coreTestResult.Color,
+                    coreTestResult.Warnings.Select(warning => (CoreTestWarning)(int)warning).ToArray(),
+                    coreTestResult.TotalCores,
+                    coreTestResult.TestedCores,
+                    coreTestResult.TotalTests);
+            }
+            else
+            {
+                ProlecGE.ControlPisoMX.BFWeb.Components.Services.LN.Models.ItemVoltageDesignModel? itemVoltageDesign =
+                await ln.GetItemVoltageDesignAsync(_appSettings.cia, item.ItemId, item.DesignId, cancellationToken)
                 .ConfigureAwait(false);
 
-            if (!string.IsNullOrWhiteSpace(request.Tag))
-            {
-                await i40.SetCoreAsTestedAsync(request.Tag, cancellationToken).ConfigureAwait(false);
-            }
+                CoresModels.ResidentialCoreTestResultModel coreTestResult = await cores.TestResidentialCoreAsync_sqlctp(
+                        request.Tag,
+                        item.ItemId,
+                        item.DesignId,
+                        request.CoreSize,
+                        itemVoltageDesign.KVA,
+                        itemVoltageDesign.PrimaryVoltage,
+                        itemVoltageDesign.SecondaryVoltage,
+                        itemVoltageDesign.TestVoltage,
+                        itemVoltageDesign.Limits
+                            .Select(l => new CoresModels.ItemVoltageLimitModel(l.Color, l.Min, l.Max))
+                            .ToArray(),
+                        request.AverageVoltage,
+                        request.RMSVoltage,
+                        request.Current,
+                        request.Temperature,
+                        request.Watts,
+                        request.CoreTemperature,
+                        request.TestCode,
+                        request.StationId,
+                        cancellationToken)
+                    .ConfigureAwait(false);
 
-            return new ResidentialCoreTestResultModel(
-                coreTestResult.ItemId,
-                coreTestResult.Batch,
-                coreTestResult.Serie,
-                coreTestResult.Sequence,
-                (ProductLine)(int)coreTestResult.ProductLine,
-                coreTestResult.TestCode,
-                (CoreTestResult)(int)coreTestResult.Status,
-                coreTestResult.CorrectedWatts,
-                coreTestResult.NewWatts,
-                coreTestResult.CurrentPercentage,
-                (CoreLimitColor)(int)coreTestResult.Color,
-                coreTestResult.Warnings.Select(warning => (CoreTestWarning)(int)warning).ToArray(),
-                coreTestResult.TotalCores,
-                coreTestResult.TestedCores,
-                coreTestResult.TotalTests);
+                if (!string.IsNullOrWhiteSpace(request.Tag))
+                {
+                    await i40.SetCoreAsTestedAsync(request.Tag, cancellationToken).ConfigureAwait(false);
+                }
+
+                return new ResidentialCoreTestResultModel(
+                    coreTestResult.ItemId,
+                    coreTestResult.Batch,
+                    coreTestResult.Serie,
+                    coreTestResult.Sequence,
+                    (ProductLine)(int)coreTestResult.ProductLine,
+                    coreTestResult.TestCode,
+                    (CoreTestResult)(int)coreTestResult.Status,
+                    coreTestResult.CorrectedWatts,
+                    coreTestResult.NewWatts,
+                    coreTestResult.CurrentPercentage,
+                    (CoreLimitColor)(int)coreTestResult.Color,
+                    coreTestResult.Warnings.Select(warning => (CoreTestWarning)(int)warning).ToArray(),
+                    coreTestResult.TotalCores,
+                    coreTestResult.TestedCores,
+                    coreTestResult.TotalTests);
+            }
         }
 
         private async Task<ERP.Models.ItemModel> GetItemAsync(

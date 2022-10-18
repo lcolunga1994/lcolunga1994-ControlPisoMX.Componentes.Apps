@@ -7,6 +7,7 @@
     using MediatR;
 
     using Residential.Models;
+    using ProlecGE.ControlPisoMX.BFWeb.Components;
 
     public class NextItemSequenceInPlanQuery : IRequest<CoreManufacturingPlanModel?>
     {
@@ -38,6 +39,7 @@
 
         private readonly ControlPisoMX.Cores.IMicroservice cores;
         private readonly ControlPisoMX.I40.IMicroservice i40;
+        private readonly AppSettings _appSettings;
 
         #endregion
 
@@ -45,10 +47,12 @@
 
         public NextItemSequenceInPlanQueryHandler(
             ControlPisoMX.Cores.IMicroservice cores,
-            ControlPisoMX.I40.IMicroservice i40)
+            ControlPisoMX.I40.IMicroservice i40,
+            AppSettings appSettings)
         {
             this.cores = cores;
             this.i40 = i40;
+            _appSettings = appSettings;
         }
 
         #endregion
@@ -59,8 +63,12 @@
             NextItemSequenceInPlanQuery request,
             CancellationToken cancellationToken)
         {
-            ControlPisoMX.Cores.Models.CoreManufacturingPlanItemModel? nextManufacturingPlan = await cores
+            ControlPisoMX.Cores.Models.CoreManufacturingPlanItemModel? nextManufacturingPlan = _appSettings.AmbientERP ?
+                await cores
                     .GetNextItemSequenceInPlanAsync(request.ItemId, CancellationToken.None)
+                    .ConfigureAwait(false)
+                    : await cores
+                    .GetNextItemSequenceInPlanAsync_discpiso(request.ItemId, CancellationToken.None)
                     .ConfigureAwait(false);
 
             return nextManufacturingPlan != null ? new CoreManufacturingPlanModel(

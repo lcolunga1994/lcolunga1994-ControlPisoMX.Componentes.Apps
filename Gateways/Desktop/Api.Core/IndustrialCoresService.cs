@@ -261,7 +261,8 @@
                         command.Temperature,
                         command.Watts,
                         command.CoreTemperature,
-                        command.StationId),
+                        command.StationId,
+                        command.IdSub),
                     cancellationToken)
                     .ConfigureAwait(false);
             }

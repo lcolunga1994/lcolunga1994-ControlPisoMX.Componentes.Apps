@@ -16,6 +16,7 @@
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using ProlecGE.ControlPisoMX.BFWeb.Components;
 
     public class ResidentialCoresService : IResidentialCoresService
     {
@@ -24,6 +25,7 @@
         private readonly IServiceProvider serviceProvider;
         private readonly IMediator mediator;
         private readonly ILogger<ResidentialCoresService> logger;
+        private readonly AppSettings _appSettings;
 
         #endregion
 
@@ -32,11 +34,13 @@
         public ResidentialCoresService(
             IServiceProvider serviceProvider,
             IMediator mediator,
-            ILogger<ResidentialCoresService> logger)
+            ILogger<ResidentialCoresService> logger,
+            AppSettings appSettings)
         {
             this.serviceProvider = serviceProvider;
             this.mediator = mediator;
             this.logger = logger;
+            _appSettings = appSettings;
         }
 
         #endregion
@@ -91,7 +95,31 @@
 
                 ControlPisoMX.Cores.IMicroservice cores = serviceProvider.GetRequiredService<ControlPisoMX.Cores.IMicroservice>();
 
-                IEnumerable<ControlPisoMX.Cores.Models.DateRangeAvailableModel> dateRangeAvailable = await cores.GetDateRangeAvailableForTestQueryAsync()
+                IEnumerable<ControlPisoMX.Cores.Models.DateRangeAvailableModel> dateRangeAvailable = _appSettings.AmbientERP ?
+                    await cores.GetDateRangeAvailableForTestQueryAsync()
+                    .ConfigureAwait(false)
+                    : await cores.GetDateRangeAvailableForTestQueryAsync_discpiso()
+                    .ConfigureAwait(false);
+
+                return dateRangeAvailable
+                    .Select(item => new DateRangeAvailableModel(item.ProductLine, item.StartUtcDate, item.EndUtcDate))
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Ocurrió un error al consultar el rango de fechas disponibles para probar en el plan de fabricación.");
+                throw;
+            }
+        }
+        public async Task<IEnumerable<DateRangeAvailableModel>> GetDateRangeAvailableForTestQueryAsync_discpiso()
+        {
+            try
+            {
+                logger.LogInformation($"Consultando el rango de fechas disponibles para probar en el plan de fabricación.");
+
+                ControlPisoMX.Cores.IMicroservice cores = serviceProvider.GetRequiredService<ControlPisoMX.Cores.IMicroservice>();
+
+                IEnumerable<ControlPisoMX.Cores.Models.DateRangeAvailableModel> dateRangeAvailable = await cores.GetDateRangeAvailableForTestQueryAsync_discpiso()
                     .ConfigureAwait(false);
 
                 return dateRangeAvailable
@@ -113,7 +141,29 @@
 
                 ControlPisoMX.Cores.IMicroservice cores = serviceProvider.GetRequiredService<ControlPisoMX.Cores.IMicroservice>();
 
-                ControlPisoMX.Cores.QueryResult<string> items = await cores.GetItemsPlannedToBeTestedAsync(page, pageSize, cancellationToken)
+                ControlPisoMX.Cores.QueryResult<string> items = _appSettings.AmbientERP ?
+                    await cores.GetItemsPlannedToBeTestedAsync(page, pageSize, cancellationToken)
+                    .ConfigureAwait(false)
+                    : await cores.GetItemsPlannedToBeTestedAsync_discpiso(page, pageSize, cancellationToken)
+                    .ConfigureAwait(false);
+
+                return new Cores.QueryResult<string>(items.Data, items.Count);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "{message}", $"Ocurrió un error al consultar los artículos planeados para la fabricación de núcleos: página:{page} tamaño:{pageSize}.");
+                throw;
+            }
+        }
+        public async Task<Cores.QueryResult<string>> GetItemsPlannedToBeManufacturedAsync_discpiso(int page, int pageSize, CancellationToken cancellationToken)
+        {
+            try
+            {
+                logger.LogInformation("{message}", $"Consultando los artículos planeados para la fabricación de núcleos: página:{page} tamaño:{pageSize}.");
+
+                ControlPisoMX.Cores.IMicroservice cores = serviceProvider.GetRequiredService<ControlPisoMX.Cores.IMicroservice>();
+
+                ControlPisoMX.Cores.QueryResult<string> items = await cores.GetItemsPlannedToBeTestedAsync_discpiso(page, pageSize, cancellationToken)
                     .ConfigureAwait(false);
 
                 return new Cores.QueryResult<string>(items.Data, items.Count);
@@ -267,7 +317,20 @@
         {
             try
             {
-                return await mediator.Send(new ResidentialCoreTestQuery(testCode), CancellationToken.None);
+                return _appSettings.AmbientERP ? await mediator.Send(new ResidentialCoreTestQuery(testCode), CancellationToken.None)
+                     : await mediator.Send(new ResidentialCoreTestQuery_discpiso(testCode), CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Ocurrió un error al consultar el resultado de la prueba con código '{testCode}' realizada a un núcleo residencial", testCode);
+                throw;
+            }
+        }
+        public async Task<ResidentialCoreTestModel?> GetResidentialCoreTestAsync_discpiso(string testCode)
+        {
+            try
+            {
+                return await mediator.Send(new ResidentialCoreTestQuery_discpiso(testCode), CancellationToken.None);
             }
             catch (Exception ex)
             {

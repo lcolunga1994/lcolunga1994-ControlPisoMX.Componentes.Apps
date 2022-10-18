@@ -15,6 +15,8 @@
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
 
+    using ProlecGE.ControlPisoMX.BFWeb.Components;
+
     public class InsulationsService : IInsulationsService
     {
         #region Fields
@@ -22,6 +24,7 @@
         private readonly ILogger<InsulationsService> logger;
         private readonly IServiceProvider serviceProvider;
         private readonly IMediator mediator;
+        private readonly AppSettings _appSettings;
 
         #endregion
 
@@ -30,11 +33,13 @@
         public InsulationsService(
             ILogger<InsulationsService> logger,
             IServiceProvider serviceProvider,
-            IMediator mediator)
+            IMediator mediator,
+            AppSettings _appSettings)
         {
             this.logger = logger;
             this.serviceProvider = serviceProvider;
             this.mediator = mediator;
+            this._appSettings = _appSettings;
         }
 
         #endregion
@@ -68,7 +73,8 @@
 
                 ProlecGE.ControlPisoMX.Insulations.IMicroservice insulations = serviceProvider.GetRequiredService<ProlecGE.ControlPisoMX.Insulations.IMicroservice>();
 
-                return await insulations.ValidateUserPasswordAsync(username, password, cancellationToken).ConfigureAwait(false);
+                return (_appSettings.AmbientERP) ? await insulations.ValidateUserPasswordAsync(username, password, cancellationToken).ConfigureAwait(false)
+                    : await insulations.ValidateUserPasswordAsync_sqlctp(username, password, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -111,8 +117,16 @@
 
                 ProlecGE.ControlPisoMX.Insulations.IMicroservice insulations = serviceProvider.GetRequiredService<ProlecGE.ControlPisoMX.Insulations.IMicroservice>();
 
-                await insulations.ChangeAllowManufacturingAsync(allow, cancellationToken)
-                .ConfigureAwait(false);
+                if (_appSettings.AmbientERP)
+                {
+                    await insulations.ChangeAllowManufacturingAsync(allow, cancellationToken)
+                    .ConfigureAwait(false);
+                }
+                else
+                {
+                    await insulations.ChangeAllowManufacturingAsync_sqlctp(allow, cancellationToken)
+                    .ConfigureAwait(false);
+                }
             }
             catch (Exception ex)
             {
@@ -233,10 +247,20 @@
 
                 ProlecGE.ControlPisoMX.Insulations.IMicroservice insulations = serviceProvider.GetRequiredService<ProlecGE.ControlPisoMX.Insulations.IMicroservice>();
 
-                return (await insulations.GetMachinesAsync(cancellationToken)
-                    .ConfigureAwait(false))
-                    .Select(e => new InsulationMachineModel(e.Number, e.Available))
-                    .ToArray();
+                if (_appSettings.AmbientERP)
+                {
+                    return (await insulations.GetMachinesAsync(cancellationToken)
+                        .ConfigureAwait(false))
+                        .Select(e => new InsulationMachineModel(e.Number, e.Available))
+                        .ToArray();
+                }
+                else
+                {
+                    return (await insulations.GetMachinesAsync_sqlctp(cancellationToken)
+                        .ConfigureAwait(false))
+                        .Select(e => new InsulationMachineModel(e.Number, e.Available))
+                        .ToArray();
+                }
             }
             catch (Exception ex)
             {
@@ -372,7 +396,13 @@
 
                 ProlecGE.ControlPisoMX.Insulations.IMicroservice insulations = serviceProvider.GetRequiredService<ProlecGE.ControlPisoMX.Insulations.IMicroservice>();
 
-                IEnumerable<InsulationMachineModel> machines = (await insulations.GetMachinesAsync(cancellationToken)
+                IEnumerable<InsulationMachineModel> machines = (_appSettings.AmbientERP) ?
+                    (await insulations.GetMachinesAsync(cancellationToken)
+                    .ConfigureAwait(false))
+                    .Select(e => new InsulationMachineModel(e.Number, e.Available))
+                    .ToArray()
+                    :
+                    (await insulations.GetMachinesAsync_sqlctp(cancellationToken)
                     .ConfigureAwait(false))
                     .Select(e => new InsulationMachineModel(e.Number, e.Available))
                     .ToArray();
@@ -412,9 +442,10 @@
                 ProlecGE.ControlPisoMX.Insulations.IMicroservice insulations = serviceProvider.GetRequiredService<ProlecGE.ControlPisoMX.Insulations.IMicroservice>();
                 ControlPisoMX.Cores.IMicroservice cores = serviceProvider.GetRequiredService<ControlPisoMX.Cores.IMicroservice>();
 
-                IEnumerable<ProlecGE.ControlPisoMX.Insulations.Models.ManufacturingPlanItemModel> scheduledOrders = await insulations
-                    .GetOrdersToManufactureAsync(utcDate, machine, cancellationToken)
-                    .ConfigureAwait(false);
+                IEnumerable<ProlecGE.ControlPisoMX.Insulations.Models.ManufacturingPlanItemModel> scheduledOrders =
+                    (_appSettings.AmbientERP) ?
+                     await insulations.GetOrdersToManufactureAsync(utcDate, machine, cancellationToken).ConfigureAwait(false)
+                    : await insulations.GetOrdersToManufactureAsync_sqlctp(utcDate, machine, cancellationToken).ConfigureAwait(false);
 
                 List<OrderToManufacturingModel> result = new();
 
@@ -470,7 +501,14 @@
 
                 ProlecGE.ControlPisoMX.Insulations.IMicroservice insulations = serviceProvider.GetRequiredService<ProlecGE.ControlPisoMX.Insulations.IMicroservice>();
 
-                await insulations.AddOrdersToManufacturingAsync(insulationOrders).ConfigureAwait(false);
+                if (_appSettings.AmbientERP)
+                {
+                    await insulations.AddOrdersToManufacturingAsync(insulationOrders).ConfigureAwait(false);
+                }
+                else
+                {
+                    await insulations.AddOrdersToManufacturingAsync_sqlctp(insulationOrders).ConfigureAwait(false);
+                }
             }
             catch (Exception ex)
             {
@@ -488,23 +526,29 @@
                 ControlPisoMX.ERP.IMicroservice erpMicroservice = serviceProvider.GetRequiredService<ControlPisoMX.ERP.IMicroservice>();
                 ProlecGE.ControlPisoMX.Insulations.IMicroservice insulations = serviceProvider.GetRequiredService<ProlecGE.ControlPisoMX.Insulations.IMicroservice>();
 
-                ControlPisoMX.ERP.Models.ManufacturingOrderModel? manufacturingOrder = await erpMicroservice.GetManufacturingOrderAsync(itemId, batch, cancellationToken);
-                if (manufacturingOrder == null)
+                if (_appSettings.AmbientERP)
                 {
-                    throw new UserException($"No existe una orden de fabricación para el artículo {itemId} y lote {batch}.");
-                }
-                else if (manufacturingOrder.Status > 4)
-                {
-                    throw new UserException("El estatus actual de la orden de fabricación ya no permite realizar reparaciones.");
-                }
+                    ControlPisoMX.ERP.Models.ManufacturingOrderModel? manufacturingOrder = await erpMicroservice.GetManufacturingOrderAsync(itemId, batch, cancellationToken);
+                    if (manufacturingOrder == null)
+                    {
+                        throw new UserException($"No existe una orden de fabricación para el artículo {itemId} y lote {batch}.");
+                    }
+                    else if (manufacturingOrder.Status > 4)
+                    {
+                        throw new UserException("El estatus actual de la orden de fabricación ya no permite realizar reparaciones.");
+                    }
+                    bool orderExistsInManufacturingPlan = await erpMicroservice.GetManufacturingProgramValidationAsync(itemId, batch, cancellationToken);
+                    if (!orderExistsInManufacturingPlan)
+                    {
+                        throw new UserException("La orden no está registrada en el programa de fabricación. Revise el código de la orden y el consecutivo.");
+                    }
 
-                bool orderExistsInManufacturingPlan = await erpMicroservice.GetManufacturingProgramValidationAsync(itemId, batch, cancellationToken);
-                if (!orderExistsInManufacturingPlan)
-                {
-                    throw new UserException("La orden no está registrada en el programa de fabricación. Revise el código de la orden y el consecutivo.");
+                    await insulations.AddRepairOrderAsync(itemId, batch, quantity, priority, cancellationToken);
                 }
-
-                await insulations.AddRepairOrderAsync(itemId, batch, quantity, priority, cancellationToken);
+                else
+                {
+                    await insulations.AddRepairOrderAsync_sqlctp(itemId, batch, quantity, priority, cancellationToken);
+                }
 
             }
             catch (Exception ex)
@@ -526,8 +570,14 @@
                 ControlPisoMX.ERP.IMicroservice erp = serviceProvider.GetRequiredService<ControlPisoMX.ERP.IMicroservice>();
 
 
-                await insulations.StartOrderManufacturingAsync(CancellationToken.None)
-                .ConfigureAwait(false);
+                if (_appSettings.AmbientERP)
+                {
+                    await insulations.StartOrderManufacturingAsync(CancellationToken.None).ConfigureAwait(false);
+                }
+                else
+                {
+                    await insulations.StartOrderManufacturingAsync_sqlctp(CancellationToken.None).ConfigureAwait(false);
+                }
             }
             catch (Exception ex)
             {
@@ -547,8 +597,16 @@
 
 
 
-                await insulations.UpdateOrderManufacturingPriorityAsync(id, priority, cancellationToken)
-                .ConfigureAwait(false);
+                if (_appSettings.AmbientERP)
+                {
+                    await insulations.UpdateOrderManufacturingPriorityAsync(id, priority, cancellationToken)
+                    .ConfigureAwait(false);
+                }
+                else
+                {
+                    await insulations.UpdateOrderManufacturingPriorityAsync_sqlctp(id, priority, cancellationToken)
+                    .ConfigureAwait(false);
+                }
             }
             catch (Exception ex)
             {
@@ -569,8 +627,16 @@
                 ControlPisoMX.ERP.IMicroservice erp = serviceProvider.GetRequiredService<ControlPisoMX.ERP.IMicroservice>();
 
 
-                await insulations.FinishOrderManufacturingAsync(CancellationToken.None)
-                .ConfigureAwait(false);
+                if (_appSettings.AmbientERP)
+                {
+                    await insulations.FinishOrderManufacturingAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+                }
+                else
+                {
+                    await insulations.FinishOrderManufacturingAsync_sqlctp(CancellationToken.None)
+                    .ConfigureAwait(false);
+                }
             }
             catch (Exception ex)
             {

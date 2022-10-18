@@ -14,6 +14,7 @@
         Task<string> GetUserAsync(string username, string password, CancellationToken cancellationToken);
 
         Task<bool> ValidateUserPasswordAsync(string username, string password, CancellationToken cancellationToken);
+        Task<bool> ValidateUserPasswordAsync_sqlctp(string username, string password, CancellationToken cancellationToken);
 
         #endregion
 
@@ -22,6 +23,7 @@
         Task<bool> IsManufacturingAllowedAsync(CancellationToken cancellationToken);
 
         Task ChangeAllowManufacturingAsync(bool allow, CancellationToken cancellationToken);
+        Task ChangeAllowManufacturingAsync_sqlctp(bool allow, CancellationToken cancellationToken);
 
         Task<int?> GetMinimumManufactureMinutesAsync(CancellationToken cancellationToken);
 
@@ -36,6 +38,7 @@
         #region Queries
 
         Task<IEnumerable<InsulationMachineModel>> GetMachinesAsync(CancellationToken cancellationToken);
+        Task<IEnumerable<InsulationMachineModel>> GetMachinesAsync_sqlctp(CancellationToken cancellationToken);
 
         Task<IEnumerable<ManufacturingPlanItemModel>> GetManufacturingPlanByMachineAsync(DateTime date, string machine, CancellationToken cancellationToken);
 
@@ -50,20 +53,26 @@
         Task<IEnumerable<MachineAssignedOrdersModel>> GetMachineAssignedOrdersAsync(CancellationToken cancellationToken);
 
         Task<IEnumerable<ManufacturingPlanItemModel>> GetOrdersToManufactureAsync(DateTime utcDate, string machine, CancellationToken cancellationToken);
+        Task<IEnumerable<ManufacturingPlanItemModel>> GetOrdersToManufactureAsync_sqlctp(DateTime utcDate, string machine, CancellationToken cancellationToken);
 
         #endregion
 
         #region Manufacturing
 
         Task AddOrdersToManufacturingAsync(List<OrderToManufactureModel> orders);
+        Task AddOrdersToManufacturingAsync_sqlctp(List<OrderToManufactureModel> orders);
 
         Task AddRepairOrderAsync(string itemId, string batch, int quantity, int priority, CancellationToken cancellationToken);
+        Task AddRepairOrderAsync_sqlctp(string itemId, string batch, int quantity, int priority, CancellationToken cancellationToken);
 
         Task StartOrderManufacturingAsync(CancellationToken cancellationToken);
+        Task StartOrderManufacturingAsync_sqlctp(CancellationToken cancellationToken);
 
         Task FinishOrderManufacturingAsync(CancellationToken cancellationToken);
+        Task FinishOrderManufacturingAsync_sqlctp(CancellationToken cancellationToken);
 
         Task UpdateOrderManufacturingPriorityAsync(Guid Id, int priority, CancellationToken cancellationToken);
+        Task UpdateOrderManufacturingPriorityAsync_sqlctp(Guid Id, int priority, CancellationToken cancellationToken);
 
         #endregion
     }

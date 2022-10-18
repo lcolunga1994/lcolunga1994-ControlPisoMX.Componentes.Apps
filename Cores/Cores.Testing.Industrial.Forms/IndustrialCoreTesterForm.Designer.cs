@@ -90,6 +90,11 @@ namespace ProlecGE.ControlPisoMX.Cores.Testing.Industrial.Forms
             this.lblRMSVoltage = new System.Windows.Forms.Label();
             this.lblAverageVoltage = new System.Windows.Forms.Label();
             this.epForm = new System.Windows.Forms.ErrorProvider(this.components);
+            this.grpDiseno = new System.Windows.Forms.GroupBox();
+            this.rdDN3 = new System.Windows.Forms.RadioButton();
+            this.rdDN4 = new System.Windows.Forms.RadioButton();
+            this.rdDN2 = new System.Windows.Forms.RadioButton();
+            this.rdDN1 = new System.Windows.Forms.RadioButton();
             this.gbInformation.SuspendLayout();
             this.gbCode.SuspendLayout();
             this.gbResults.SuspendLayout();
@@ -97,6 +102,7 @@ namespace ProlecGE.ControlPisoMX.Cores.Testing.Industrial.Forms
             this.gbWattsLimits.SuspendLayout();
             this.gbItemVoltages.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.epForm)).BeginInit();
+            this.grpDiseno.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnClose
@@ -116,6 +122,7 @@ namespace ProlecGE.ControlPisoMX.Cores.Testing.Industrial.Forms
             // 
             // gbInformation
             // 
+            this.gbInformation.Controls.Add(this.grpDiseno);
             this.gbInformation.Controls.Add(this.txtBatch);
             this.gbInformation.Controls.Add(this.txtSerie);
             this.gbInformation.Controls.Add(this.btnFind);
@@ -168,7 +175,7 @@ namespace ProlecGE.ControlPisoMX.Cores.Testing.Industrial.Forms
             this.btnFind.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnFind.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnFind.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(136)))), ((int)(((byte)(84)))), ((int)(((byte)(255)))));
-            this.btnFind.Location = new System.Drawing.Point(78, 135);
+            this.btnFind.Location = new System.Drawing.Point(78, 214);
             this.btnFind.Name = "btnFind";
             this.btnFind.Size = new System.Drawing.Size(78, 26);
             this.btnFind.TabIndex = 6;
@@ -257,11 +264,12 @@ namespace ProlecGE.ControlPisoMX.Cores.Testing.Industrial.Forms
             this.cmbFoilWidth.Name = "cmbFoilWidth";
             this.cmbFoilWidth.Size = new System.Drawing.Size(106, 23);
             this.cmbFoilWidth.TabIndex = 5;
+            this.cmbFoilWidth.SelectedIndexChanged += new System.EventHandler(this.cmbFoilWidth_SelectedIndexChanged);
             // 
             // lblPieceNumber
             // 
             this.lblPieceNumber.AutoSize = true;
-            this.lblPieceNumber.Location = new System.Drawing.Point(10, 178);
+            this.lblPieceNumber.Location = new System.Drawing.Point(10, 246);
             this.lblPieceNumber.Name = "lblPieceNumber";
             this.lblPieceNumber.Size = new System.Drawing.Size(97, 15);
             this.lblPieceNumber.TabIndex = 10;
@@ -271,7 +279,7 @@ namespace ProlecGE.ControlPisoMX.Cores.Testing.Industrial.Forms
             // 
             this.lblPieceNumberValue.AutoSize = true;
             this.lblPieceNumberValue.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblPieceNumberValue.Location = new System.Drawing.Point(199, 178);
+            this.lblPieceNumberValue.Location = new System.Drawing.Point(199, 246);
             this.lblPieceNumberValue.Name = "lblPieceNumberValue";
             this.lblPieceNumberValue.Size = new System.Drawing.Size(26, 15);
             this.lblPieceNumberValue.TabIndex = 11;
@@ -794,6 +802,63 @@ namespace ProlecGE.ControlPisoMX.Cores.Testing.Industrial.Forms
             this.epForm.BlinkStyle = System.Windows.Forms.ErrorBlinkStyle.AlwaysBlink;
             this.epForm.ContainerControl = this;
             // 
+            // grpDiseno
+            // 
+            this.grpDiseno.Controls.Add(this.rdDN3);
+            this.grpDiseno.Controls.Add(this.rdDN4);
+            this.grpDiseno.Controls.Add(this.rdDN2);
+            this.grpDiseno.Controls.Add(this.rdDN1);
+            this.grpDiseno.Location = new System.Drawing.Point(52, 140);
+            this.grpDiseno.Name = "grpDiseno";
+            this.grpDiseno.Size = new System.Drawing.Size(130, 68);
+            this.grpDiseno.TabIndex = 13;
+            this.grpDiseno.TabStop = false;
+            this.grpDiseno.Text = "Diseño";
+            // 
+            // rdDN3
+            // 
+            this.rdDN3.AutoSize = true;
+            this.rdDN3.Location = new System.Drawing.Point(64, 16);
+            this.rdDN3.Name = "rdDN3";
+            this.rdDN3.Size = new System.Drawing.Size(48, 19);
+            this.rdDN3.TabIndex = 3;
+            this.rdDN3.TabStop = true;
+            this.rdDN3.Text = "DN3";
+            this.rdDN3.UseVisualStyleBackColor = true;
+            // 
+            // rdDN4
+            // 
+            this.rdDN4.AutoSize = true;
+            this.rdDN4.Location = new System.Drawing.Point(64, 41);
+            this.rdDN4.Name = "rdDN4";
+            this.rdDN4.Size = new System.Drawing.Size(48, 19);
+            this.rdDN4.TabIndex = 2;
+            this.rdDN4.TabStop = true;
+            this.rdDN4.Text = "DN4";
+            this.rdDN4.UseVisualStyleBackColor = true;
+            // 
+            // rdDN2
+            // 
+            this.rdDN2.AutoSize = true;
+            this.rdDN2.Location = new System.Drawing.Point(10, 41);
+            this.rdDN2.Name = "rdDN2";
+            this.rdDN2.Size = new System.Drawing.Size(48, 19);
+            this.rdDN2.TabIndex = 1;
+            this.rdDN2.TabStop = true;
+            this.rdDN2.Text = "DN2";
+            this.rdDN2.UseVisualStyleBackColor = true;
+            // 
+            // rdDN1
+            // 
+            this.rdDN1.AutoSize = true;
+            this.rdDN1.Location = new System.Drawing.Point(10, 16);
+            this.rdDN1.Name = "rdDN1";
+            this.rdDN1.Size = new System.Drawing.Size(48, 19);
+            this.rdDN1.TabIndex = 0;
+            this.rdDN1.TabStop = true;
+            this.rdDN1.Text = "DN1";
+            this.rdDN1.UseVisualStyleBackColor = true;
+            // 
             // IndustrialCoreTesterForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -830,6 +895,8 @@ namespace ProlecGE.ControlPisoMX.Cores.Testing.Industrial.Forms
             this.gbItemVoltages.ResumeLayout(false);
             this.gbItemVoltages.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.epForm)).EndInit();
+            this.grpDiseno.ResumeLayout(false);
+            this.grpDiseno.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -895,5 +962,10 @@ namespace ProlecGE.ControlPisoMX.Cores.Testing.Industrial.Forms
         private System.Windows.Forms.MaskedTextBox txtSerie;
         private System.Windows.Forms.MaskedTextBox txtBatch;
         private System.Windows.Forms.ErrorProvider epForm;
+        private System.Windows.Forms.GroupBox grpDiseno;
+        private System.Windows.Forms.RadioButton rdDN3;
+        private System.Windows.Forms.RadioButton rdDN4;
+        private System.Windows.Forms.RadioButton rdDN2;
+        private System.Windows.Forms.RadioButton rdDN1;
     }
 }

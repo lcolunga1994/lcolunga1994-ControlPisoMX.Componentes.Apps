@@ -12,9 +12,14 @@ namespace ProlecGE.ControlPisoMX.BFWeb.Components.Api
 
     public class Startup
     {
+        public readonly bool _ambientERP;
+        public readonly int cia;
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            // switch ambient erp
+            _ambientERP = configuration.GetValue<bool>("AmbientERP");
+            cia = configuration.GetValue<int>("cia");
         }
 
         public IConfiguration Configuration { get; }
@@ -70,6 +75,13 @@ namespace ProlecGE.ControlPisoMX.BFWeb.Components.Api
                       return env.IsDevelopment() || env.IsStaging();
                   };
               });
+
+            //Agregué Luis Colunga 24/Ago/2022
+            services.AddSingleton(new ProlecGE.ControlPisoMX.BFWeb.Components.AppSettings
+            {
+                AmbientERP = _ambientERP,
+                cia = cia
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -112,6 +124,8 @@ namespace ProlecGE.ControlPisoMX.BFWeb.Components.Api
             services.AddHttpClient<ControlPisoMX.Insulations.IMicroservice, ControlPisoMX.Insulations.Api.InsulationsMicroservice>("insulations", client => client.BaseAddress = new System.Uri(configuration.GetSection("MicroservicesUrls:Insulations").Value));
 
             services.AddHttpClient<ControlPisoMX.InspectionCMS.IMicroservice, Services.InspectionCMSHttpMicroservice>("inspection", client => client.BaseAddress = new System.Uri(configuration.GetSection("MicroservicesUrls:InspectionCMS").Value));
+
+            services.AddHttpClient<ControlPisoMX.LN.ITtxpcf925Repository, ControlPisoMX.LN.Api.Ttxpcf925Repository>("ln", client => client.BaseAddress = new System.Uri(configuration.GetSection("MicroservicesUrls:LN").Value));
 
             services.AddHttpClient<IComboService, ComboService>("combo", client => client.BaseAddress = new System.Uri(configuration.GetSection("MicroservicesUrls:ERP").Value));
 

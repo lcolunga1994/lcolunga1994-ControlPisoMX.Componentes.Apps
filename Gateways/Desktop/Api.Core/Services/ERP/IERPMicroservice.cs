@@ -36,6 +36,11 @@
             string designId,
             int coreSize,
             CancellationToken cancellationToken);
+        Task<ItemVoltageDesignModel?> GetItemVoltageDesignAsync_sqlctp(
+            string itemId,
+            string designId,
+            int coreSize,
+            CancellationToken cancellationToken);
 
         #region Cores supply
 
@@ -61,12 +66,21 @@
         Task<IEnumerable<CartonShearModel>> GetItemCartonShearsAsync(
             string itemId,
             CancellationToken cancellationToken);
+        Task<IEnumerable<CartonShearModel>> GetItemCartonShearsAsync_sqlctp(
+            string itemId,
+            CancellationToken cancellationToken);
 
         Task<IEnumerable<GuillotineShearModel>> GetItemGuillotineShearsAsync(
            string itemId,
            CancellationToken cancellationToken);
+        Task<IEnumerable<GuillotineShearModel>> GetItemGuillotineShearsAsync_sqlctp(
+           string itemId,
+           CancellationToken cancellationToken);
 
         Task<IEnumerable<SierraShearModel>> GetItemSierraShearsAsync(
+            string itemId,
+            CancellationToken cancellationToken);
+        Task<IEnumerable<SierraShearModel>> GetItemSierraShearsAsync_sqlctp(
             string itemId,
             CancellationToken cancellationToken);
 

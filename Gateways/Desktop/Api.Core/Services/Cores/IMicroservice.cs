@@ -36,7 +36,13 @@
 
         Task<IEnumerable<DateRangeAvailableModel>> GetDateRangeAvailableForTestQueryAsync();
 
+        Task<IEnumerable<DateRangeAvailableModel>> GetDateRangeAvailableForTestQueryAsync_discpiso();
+
         Task<QueryResult<string>> GetItemsPlannedToBeTestedAsync(
+            int page,
+            int pageSize,
+            CancellationToken cancellationToken);
+        Task<QueryResult<string>> GetItemsPlannedToBeTestedAsync_discpiso(
             int page,
             int pageSize,
             CancellationToken cancellationToken);
@@ -45,11 +51,15 @@
 
         Task<CoreManufacturingPlanItemModel?> GetNextItemSequenceInPlanAsync(string itemId, CancellationToken cancellationToken);
 
+        Task<CoreManufacturingPlanItemModel?> GetNextItemSequenceInPlanAsync_discpiso(string itemId, CancellationToken cancellationToken);
+
         #endregion
 
         #region Tests
 
         Task<ResidentialCoreTestModel?> GetResidentialCoreTestAsync(string testCode);
+
+        Task<ResidentialCoreTestModel?> GetResidentialCoreTestAsync_discpiso(string testCode);
 
         Task<ResidentialCoreTestSummaryModel?> GetResidentialCoreTestSummaryAsync(
             string itemId,
@@ -77,8 +87,48 @@
             string testCode,
             string? stationId,
             CancellationToken cancellationToken);
+        Task<ResidentialCoreTestResultModel> TestResidentialCoreAsync_sqlctp(
+            string? tag,
+            string itemId,
+            string designId,
+            int coreSize,
+            double? kva,
+            double primaryVoltage,
+            double? secondaryVoltage,
+            double? testVoltage,
+            IEnumerable<ItemVoltageLimitModel> limits,
+            double averageVoltage,
+            double rmsVoltage,
+            double current,
+            double temperature,
+            double watts,
+            double coreTemperature,
+            string testCode,
+            string? stationId,
+            CancellationToken cancellationToken);
 
         Task<ResidentialCoreTestResultModel> ReworkResidentialCoreAsync(
+           string itemId,
+           string designId,
+           int productLine,
+           int phases,
+           int coreSize,
+           double? kva,
+           double primaryVoltage,
+           double? secondaryVoltage,
+           double? testVoltage,
+           IEnumerable<ItemVoltageLimitModel> limits,
+           double averageVoltage,
+           double rmsVoltage,
+           double current,
+           double temperature,
+           double watts,
+           double coreTemperature,
+           string testCode,
+           string? stationId,
+           CancellationToken cancellationToken);
+
+        Task<ResidentialCoreTestResultModel> ReworkResidentialCoreAsync_sqlctp(
            string itemId,
            string designId,
            int productLine,
@@ -148,6 +198,8 @@
 
         Task<SupplyCoreResultModel?> SupplyCoresAsync(string itemId, string batch, int serie, bool force, string user);
 
+        Task<SupplyCoreResultModel?> SupplyCoresAsync_discpiso(string itemId, string batch, int serie, bool force, string user);
+
         Task ReprintAsync(Guid manufacturingOrderId, string user);
 
         Task RefreshPrintableAttributesAsync(string itemId, string batch, int serie, List<MOPrintableAttributeModel> attributes);
@@ -179,10 +231,17 @@
 
         Task<IEnumerable<double>?> GetCoreFoilWidthsAsync(string itemId, int coreSize);
 
+        Task<IEnumerable<double>?> GetCoreFoilWidthsAsync_sqlctp(string itemId, int coreSize);
+
         Task<IndustrialItemVoltageDesignModel?> GetIndustrialCoreVoltageDesignAsync(
             string itemId,
             int coreSize,
             double foilWidth);
+        Task<IndustrialItemVoltageDesignModel?> GetIndustrialCoreVoltageDesignAsync_sqlctp(
+            string itemId,
+            int coreSize,
+            double foilWidth);
+
 
         #endregion
 
@@ -208,6 +267,23 @@
             double watts,
             double coreTemperature,
             string? stationId,
+            string idSub,
+            CancellationToken cancellationToken);
+        Task<IndustrialCoreTestResultModel> TestIndustrialCoreAsync_sqlctp(
+            string itemId,
+            string batch,
+            int serie,
+            int coreSize,
+            double foilWidth,
+            string testCode,
+            double averageVoltage,
+            double rmsVoltage,
+            double current,
+            double temperature,
+            double watts,
+            double coreTemperature,
+            string? stationId,
+            string idSub,
             CancellationToken cancellationToken);
 
         #endregion
@@ -228,6 +304,7 @@
         Task<IEnumerable<MOSupplyItemModel>> GetOrdersToPlaceClampsAsync(CancellationToken cancellationToken);
 
         Task RemoveClampOrderAsync(string itemId, string batch, int serie, int sequence, CancellationToken cancellation);
+        
 
         #endregion
     }

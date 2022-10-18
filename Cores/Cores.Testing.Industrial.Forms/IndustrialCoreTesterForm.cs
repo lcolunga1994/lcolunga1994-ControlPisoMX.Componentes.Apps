@@ -174,6 +174,16 @@
                 cmbFoilWidth.Enabled = false;
             }
         }
+        private void cmbFoilWidth_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CoreSizes? selectedCoreSize = GetSelectedCoreSize();
+
+            if (selectedCoreSize.HasValue)
+            {
+                SelectDesign(selectedCoreSize.Value, cmbFoilWidth.SelectedIndex);
+            }
+
+        }
 
         private void BtnFind_Click(object sender, EventArgs e)
         {
@@ -210,8 +220,8 @@
             string text = ((Control)sender).Text;
             if (!string.IsNullOrWhiteSpace(text) && !rgx.IsMatch(text))
             {
-                e.Cancel = true;
-                epForm.SetError((Control)sender, "Solo se admiten letras y números.");
+                //e.Cancel = true;
+                //epForm.SetError((Control)sender, "Solo se admiten letras y números.");
             }
         }
 
@@ -220,8 +230,8 @@
             string text = ((Control)sender).Text;
             if (!string.IsNullOrWhiteSpace(text) && !rgx.IsMatch(text))
             {
-                e.Cancel = true;
-                epForm.SetError((Control)sender, "Solo se admiten letras y números.");
+                //e.Cancel = true;
+                //epForm.SetError((Control)sender, "Solo se admiten letras y números.");
             }
         }
 
@@ -278,6 +288,30 @@
 
             TestResult = null;
             DisplayTestResult();
+        }
+
+        private string GetDesign()
+        {
+            if (rdDN1.Checked)
+            {
+                return "DN1";
+            }
+            else if (rdDN2.Checked)
+            {
+                return "DN2";
+            }
+            else if (rdDN3.Checked)
+            {
+                return "DN3";
+            }
+            else if (rdDN4.Checked)
+            {
+                return "DN4";
+            }
+            else
+            {
+                return String.Empty;
+            }
         }
 
         private void CloseForm() => Close();
@@ -407,7 +441,8 @@
                                         coreTestValues.Temperature,
                                         coreTestValues.Watts,
                                         coreTemperature,
-                                        stationId),
+                                        stationId,
+                                        GetDesign()),
                                         CancellationToken.None)
                                     .ConfigureAwait(false);
 
@@ -524,6 +559,35 @@
                 else if (progress.State is OperationState.Finished or OperationState.Canceled)
                 {
                     SetBusy(false);
+                }
+            }
+        }
+
+        private void SelectDesign(CoreSizes coreSize, int Tipo)
+        {
+            if (coreSize == CoreSizes.Small)
+            {
+                switch (Tipo)
+                {
+                    case 0:
+                        rdDN1.Checked = true;
+                        break;
+                    case 1:
+                        rdDN2.Checked = true;
+                        break;
+                }
+
+            }
+            else if (coreSize == CoreSizes.Big)
+            {
+                switch (Tipo)
+                {
+                    case 0:
+                        rdDN3.Checked = true;
+                        break;
+                    case 1:
+                        rdDN4.Checked = true;
+                        break;
                 }
             }
         }
@@ -1161,5 +1225,7 @@
             ReadCoreTestValues,
             CoreTestResult
         }
+
+        
     }
 }
