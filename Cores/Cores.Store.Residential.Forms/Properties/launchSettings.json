@@ -1,0 +1,16 @@
+{
+  "profiles": {
+    "ProlecGE.ControlPisoMX.Cores.Storing.Residential.Forms": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "ProlecGE.ControlPisoMX.Cores.Storing.Residential.Forms.Local": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_Environment": "Local"
+      }
+    }
+  }
+}

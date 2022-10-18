@@ -1,0 +1,16 @@
+{
+  "profiles": {
+    "CoresUsher.Industrial.Forms": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "CoresUsher.Industrial.Forms.Local": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_Environment": "Local"
+      }
+    }
+  }
+}

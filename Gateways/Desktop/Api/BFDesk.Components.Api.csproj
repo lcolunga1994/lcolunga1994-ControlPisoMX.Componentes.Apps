@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk.Web">
+	<PropertyGroup Label="Globals" />
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<RootNamespace>ProlecGE.ControlPisoMX.BFWeb.Components.Api</RootNamespace>
+		<AssemblyName>ControlPisoMX.BFDesk.Components.Api</AssemblyName>
+		<UserSecretsId>8fccdbcc-2f43-4f28-abea-8288da51d5c5</UserSecretsId>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Hellang.Middleware.ProblemDetails" Version="6.3.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.2.3" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\Api.Core\BFDesk.Components.Api.Core.csproj" />
+	</ItemGroup>
+</Project>

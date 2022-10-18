@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Clamps.Forms": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

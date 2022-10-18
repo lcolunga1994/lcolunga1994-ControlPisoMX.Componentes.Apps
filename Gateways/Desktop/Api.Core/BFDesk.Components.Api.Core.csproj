@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup Label="Globals" />
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<RootNamespace>ProlecGE.ControlPisoMX.BFWeb.Components</RootNamespace>
+		<AssemblyName>ControlPisoMX.BFDesk.Components.Api.Core</AssemblyName>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
+	<ItemGroup>
+		<Compile Remove="Cores\Industrial\Models\**" />
+		<EmbeddedResource Remove="Cores\Industrial\Models\**" />
+		<None Remove="Cores\Industrial\Models\**" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="AutoMapper" Version="10.1.1" />
+		<PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Api.Clamps.Abstractions\BFDesk.Components.Api.Clamps.Abstractions.csproj" />
+		<ProjectReference Include="..\Api.Combo.Abstractions\BFDesk.Components.Api.Combo.Abstractions.csproj" />
+		<ProjectReference Include="..\Api.Cores.Abstractions\BFDesk.Components.Api.Cores.Abstractions.csproj" />
+		<ProjectReference Include="..\Api.InspectionCMS.Abstractions\BFDesk.Components.Api.InspectionCMS.Abstractions.csproj" />
+		<ProjectReference Include="..\Api.Insulations.Abstractions\BFDesk.Components.Api.Insulations.Abstractions.csproj" />
+	</ItemGroup>
+</Project>

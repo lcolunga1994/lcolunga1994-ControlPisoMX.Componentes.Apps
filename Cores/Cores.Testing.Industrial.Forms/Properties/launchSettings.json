@@ -1,0 +1,16 @@
+{
+  "profiles": {
+    "CoresTesting.Industrial.Forms": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "CoresTesting.Industrial.Forms.Local": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_Environment": "Local"
+      }
+    }
+  }
+}

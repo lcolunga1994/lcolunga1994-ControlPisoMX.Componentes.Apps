@@ -1,0 +1,17 @@
+{
+  "profiles": {
+    "CoreSupply.Forms": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "Suministro de nucleos": {
+      "commandName": "Project",
+      "commandLineArgs": "AIS_A",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

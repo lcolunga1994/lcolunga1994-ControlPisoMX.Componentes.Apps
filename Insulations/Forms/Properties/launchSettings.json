@@ -1,0 +1,59 @@
+{
+  "profiles": {
+    "Insulations.Forms": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "Insulations.Carton": {
+      "commandName": "Project",
+      "commandLineArgs": "AIS_C",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "Insulations.Guillotine": {
+      "commandName": "Project",
+      "commandLineArgs": "AIS_D",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "Insulations.Tips": {
+      "commandName": "Project",
+      "commandLineArgs": "AIS_G",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "Insulations.Cuts": {
+      "commandName": "Project",
+      "commandLineArgs": "AIS_I",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "Insulations.Terminate": {
+      "commandName": "Project",
+      "commandLineArgs": "AIS_B",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "Insulations.Maintenance": {
+      "commandName": "Project",
+      "commandLineArgs": "AIS_H",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "Insulations.ManufPlanSelect": {
+      "commandName": "Project",
+      "commandLineArgs": "AIS_J",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

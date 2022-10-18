@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<RootNamespace>ProlecGE.ControlPisoMX.BFWeb.Components</RootNamespace>
+		<AssemblyName>ProlecGE.ControlPisoMX.BFWeb.Components.Combo.Abstractions</AssemblyName>
+	</PropertyGroup>
+
+</Project>

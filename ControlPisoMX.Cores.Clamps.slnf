@@ -1,0 +1,18 @@
+{
+  "solution": {
+    "path": "ControlPisoMX.Cores.Apps.sln",
+    "projects": [
+      "Gateways\\Desktop\\Api.Clamps.Abstractions\\BFDesk.Components.Api.Clamps.Abstractions.csproj",
+      "Gateways\\Desktop\\Api.Combo.Abstractions\\BFDesk.Components.Api.Combo.Abstractions.csproj",
+      "Gateways\\Desktop\\Api.Core\\BFDesk.Components.Api.Core.csproj",
+      "Gateways\\Desktop\\Api.Cores.Abstractions\\BFDesk.Components.Api.Cores.Abstractions.csproj",
+      "Gateways\\Desktop\\Api.InspectionCMS.Abstractions\\BFDesk.Components.Api.InspectionCMS.Abstractions.csproj",
+      "Gateways\\Desktop\\Api.Insulations.Abstractions\\BFDesk.Components.Api.Insulations.Abstractions.csproj",
+      "Gateways\\Desktop\\Api\\BFDesk.Components.Api.csproj",
+      "Cores\\Clamps.Api.Client\\Clamps.Api.Gateway.Client.csproj",
+      "Cores\\Clamps.Forms\\Clamps.Forms.csproj",
+      "Cores\\Shared\\Http\\ControlPisoMX.Utils.Http.csproj",
+      "Cores\\Shared\\Utils\\ControlPisoMX.Utils.csproj"
+    ]
+  }
+}
