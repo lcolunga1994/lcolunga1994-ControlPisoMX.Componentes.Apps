@@ -83,6 +83,33 @@
                     "ValidatePassword");
             }
         }
+        public async Task<bool> ValidateUserPasswordAsync_sqlctp(string username, string password, CancellationToken cancellationToken)
+        {
+            try
+            {
+                logger.LogInformation($"Validando el usuario");
+
+                if (string.IsNullOrWhiteSpace(username))
+                {
+                    throw new UserException("La usuario es requerido.");
+                }
+
+                return await GetAsync<bool>($"insulations/validateuserpassword_sqlctp?username={username}&password={password}", CancellationToken.None).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Ocurrió un error al validar el usuario");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    $"No se puede consultar el usuario",
+                    "ValidatePassword");
+            }
+        }
 
         #endregion
 
@@ -121,6 +148,32 @@
 
 #pragma warning disable CA2016 // Forward the 'CancellationToken' parameter to methods
                 await PostAsync(url: $"insulations/changeallowmanufacturing?allow={allow.ToString().ToLower()}")
+                    .ConfigureAwait(false);
+#pragma warning restore CA2016 // Forward the 'CancellationToken' parameter to methods
+
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Ocurrió un error al suspender/reactivar labores.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    $"No se puede  suspender suspender/reactivar labores.",
+                    "ChangesAllowManufacturing");
+            }
+        }
+        public async Task ChangeAllowManufacturingAsync_sqlctp(bool allow, CancellationToken cancellationToken)
+        {
+            try
+            {
+                logger.LogInformation($"Ejecutando proceso suspender/reactivar labores");
+
+#pragma warning disable CA2016 // Forward the 'CancellationToken' parameter to methods
+                await PostAsync(url: $"insulations/changeallowmanufacturing_sqlctp?allow={allow.ToString().ToLower()}")
                     .ConfigureAwait(false);
 #pragma warning restore CA2016 // Forward the 'CancellationToken' parameter to methods
 
@@ -261,6 +314,35 @@
                 logger.LogInformation($"Consultando las maquinas de aislamiento.");
 
                 IEnumerable<InsulationMachineModel>? result = await GetAsync<IEnumerable<InsulationMachineModel>>("insulations/machines", CancellationToken.None).ConfigureAwait(false);
+
+                if (result == null)
+                {
+                    return Enumerable.Empty<InsulationMachineModel>();
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Ocurrió un error al consultar las maquinas de aislamiento.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    $"No se pueden consultar las maquinas de aislamiento en este momento.",
+                    "Machines");
+            }
+        }
+        public async Task<IEnumerable<InsulationMachineModel>> GetMachinesAsync_sqlctp(CancellationToken cancellationToken)
+        {
+            try
+            {
+                logger.LogInformation($"Consultando las maquinas de aislamiento.");
+
+                IEnumerable<InsulationMachineModel>? result = await GetAsync<IEnumerable<InsulationMachineModel>>("insulations/machines_sqlctp", CancellationToken.None).ConfigureAwait(false);
 
                 if (result == null)
                 {
@@ -507,6 +589,43 @@
                     "OrdersToManufacture");
             }
         }
+        public async Task<IEnumerable<ManufacturingPlanItemModel>> GetOrdersToManufactureAsync_sqlctp(DateTime date, string machine, CancellationToken cancellationToken)
+        {
+            try
+            {
+                logger.LogInformation("{message}", $"Consultando el plan de fabricación de la maquina {machine} en la fecha:{date:G}.");
+
+                IEnumerable<ManufacturingPlanItemModel>? result =
+                    await GetAsync<IEnumerable<ManufacturingPlanItemModel>, MachineManufacturingPlanModel>($"insulations/orderstomanufacture_sqlctp",
+                    new MachineManufacturingPlanModel()
+                    {
+                        Machine = machine,
+                        Date = date
+                    },
+                    cancellationToken)
+                    .ConfigureAwait(false);
+
+                if (result == null)
+                {
+                    return Enumerable.Empty<ManufacturingPlanItemModel>();
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "{message}", $"Ocurrió un error al consultar el plan de fabricación de la maquina {machine} en la fecha:{date}.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    $"No se puede consultar el plan de fabricación de la maquina {machine} en este momento.",
+                    "OrdersToManufacture");
+            }
+        }
 
 
 
@@ -537,6 +656,29 @@
                     "AddOrdersToManufacturing");
             }
         }
+        public async Task AddOrdersToManufacturingAsync_sqlctp(List<OrderToManufactureModel> orders)
+        {
+            try
+            {
+                logger.LogInformation($"Agregando ordenes a lista de fabricación.");
+
+                await PostAsync($"insulations/addtomanufacturing_sqlctp", orders, CancellationToken.None)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Ocurrió un error al agregar ordenes a la lista de fabricación.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    $"No se pueden agregar ordenes a la lista de fabricación en este momento.",
+                    "AddOrdersToManufacturing");
+            }
+        }
 
         public async Task AddRepairOrderAsync(string itemId, string batch, int quantity, int priority, CancellationToken cancellationToken)
         {
@@ -545,6 +687,30 @@
                 logger.LogInformation($"Agregando orden a reparar.");
 
                 await PostAsync($"insulations/addrepairorder", new OrderToRepairModel(itemId, batch, quantity, priority), cancellationToken).ConfigureAwait(false);
+
+
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Ocurrió un error al agregar orden a reparar.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    $"No se puede agregar orden a reparar.",
+                    "AddRepairOrder");
+            }
+        }
+        public async Task AddRepairOrderAsync_sqlctp(string itemId, string batch, int quantity, int priority, CancellationToken cancellationToken)
+        {
+            try
+            {
+                logger.LogInformation($"Agregando orden a reparar.");
+
+                await PostAsync($"insulations/addrepairorder_sqlctp", new OrderToRepairModel(itemId, batch, quantity, priority), cancellationToken).ConfigureAwait(false);
 
 
             }
@@ -588,6 +754,31 @@
                     "StarOrderManufacturing");
             }
         }
+        public async Task StartOrderManufacturingAsync_sqlctp(CancellationToken cancellationToken)
+        {
+            try
+            {
+                logger.LogInformation($"Iniciando la orden pendiente.");
+
+#pragma warning disable CA2016 // Forward the 'CancellationToken' parameter to methods
+                await PostAsync($"insulations/startordermanufacturing_sqlctp")
+                    .ConfigureAwait(false);
+#pragma warning restore CA2016 // Forward the 'CancellationToken' parameter to methods
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Ocurrió un error al iniciar la orden pendiente.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    $"No se pueden consultar al iniciar la orden pendiente",
+                    "StarOrderManufacturing");
+            }
+        }
 
         public async Task FinishOrderManufacturingAsync(CancellationToken cancellationToken)
         {
@@ -597,6 +788,31 @@
 
 #pragma warning disable CA2016 // Forward the 'CancellationToken' parameter to methods
                 await PostAsync($"insulations/finishordermanufacturing")
+                    .ConfigureAwait(false);
+#pragma warning restore CA2016 // Forward the 'CancellationToken' parameter to methods
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Ocurrió un error al terminar la orden en ejecucion.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    $"No se puede terminar la orden en ejecucion",
+                    "EndOrderManufacturing");
+            }
+        }
+        public async Task FinishOrderManufacturingAsync_sqlctp(CancellationToken cancellationToken)
+        {
+            try
+            {
+                logger.LogInformation($"Terminando la orden en ejecucion.");
+
+#pragma warning disable CA2016 // Forward the 'CancellationToken' parameter to methods
+                await PostAsync($"insulations/finishordermanufacturing_sqlctp")
                     .ConfigureAwait(false);
 #pragma warning restore CA2016 // Forward the 'CancellationToken' parameter to methods
             }
@@ -639,7 +855,30 @@
                     "AddOrderToManufacturing");
             }
         }
+        public async Task UpdateOrderManufacturingPriorityAsync_sqlctp(Guid id, int priority, CancellationToken cancellationToken)
+        {
+            try
+            {
+                logger.LogInformation("{message}", $"Actualizando prioridad de la orden {id}.");
 
+                await PostAsync($"insulations/changepriority_sqlctp", new UpdatePriorityModel(id, priority), cancellationToken)
+                    .ConfigureAwait(false);
+
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "{message}", $"Ocurrió un error al actualizar la prioridad del plan de fabricación de la orden {id}.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    $"No se puede  actualizar la prioridad del plan de fabricación {id} en este momento.",
+                    "AddOrderToManufacturing");
+            }
+        }
         #endregion
 
         #region Functionality

@@ -151,6 +151,18 @@
             return Ok(result);
         }
 
+        [Route("SupplyCores_discpiso/{itemId:maxlength(47)}/{batch:maxlength(3)}/{serie:int}/{force:bool}/{user}")]
+        [HttpPost]
+        [ProducesResponseType(typeof(IEnumerable<SupplyCoreResultModel?>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<SupplyCoreResultModel?>> SupplyCores_discpiso([Required] string itemId, [Required] string batch, [Required] int serie, [Required] bool force, string user)
+        {
+            SupplyCoreResultModel? result = await service
+                .SupplyCoresAsync_discpiso(itemId, batch, serie, force, user)
+                .ConfigureAwait(false);
+
+            return Ok(result);
+        }
+
         [Route("reprint/{id:guid}/{user}")]
         [HttpPost]
         [ProducesResponseType((int)HttpStatusCode.OK)]

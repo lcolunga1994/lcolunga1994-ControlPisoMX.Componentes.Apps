@@ -262,6 +262,35 @@
                     "CoresVoltageDesign");
             }
         }
+        public async Task<ItemVoltageDesignModel?> GetItemVoltageDesignAsync_sqlctp(
+            string itemId,
+            string designId,
+            int coreSize,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                logger.LogInformation($"Consultando los voltajes del artículo '{itemId}' - diseño '{designId}'.");
+
+                return await GetAsync<ItemVoltageDesignModel?>(
+                    $"cores/design/voltage_sqlctp/{itemId}/{designId}/{(int)coreSize}",
+                    cancellationToken)
+                .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Ocurrió un error al consultar los voltajes del artículo '{itemId}' - diseño '{designId}'.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    "No se puede consultar la información de diseño en este momento.",
+                    "CoresVoltageDesign");
+            }
+        }
 
         #region Cores supply
 
@@ -344,6 +373,31 @@
                     "GetItemCartonShears");
             }
         }
+        public async Task<IEnumerable<CartonShearModel>> GetItemCartonShearsAsync_sqlctp(
+           string itemId,
+           CancellationToken cancellationToken)
+        {
+            try
+            {
+                logger.LogInformation($"Consultando datos de materiales de Cizalla '{itemId}'.");
+
+                return (await GetAsync<IEnumerable<CartonShearModel>>($"insulations/cartonShears_sqlctp/{itemId}", cancellationToken)
+                    .ConfigureAwait(false)) ?? Enumerable.Empty<CartonShearModel>();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Ocurrió un error al consultar datos de los materiales de Cizalla'{itemId}'.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    "No se pueden consultar los datos de los materiales en este momento",
+                    "GetItemCartonShears");
+            }
+        }
 
         public async Task<IEnumerable<GuillotineShearModel>> GetItemGuillotineShearsAsync(string itemId, CancellationToken cancellationToken)
         {
@@ -368,6 +422,29 @@
                     "GetItemGuillotineShears");
             }
         }
+        public async Task<IEnumerable<GuillotineShearModel>> GetItemGuillotineShearsAsync_sqlctp(string itemId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                logger.LogInformation($"Consultando datos de materiales de la guillotina para el artículo '{itemId}'.");
+
+                return (await GetAsync<IEnumerable<GuillotineShearModel>>($"insulations/guillotineShears_sqlctp/{itemId}", cancellationToken)
+                    .ConfigureAwait(false)) ?? Enumerable.Empty<GuillotineShearModel>();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Ocurrió un error al consultar datos de los materiales de la guillotina para el artículo '{itemId}' en este momento.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    $"No se pueden consultar los datos de los materiales de la guillotina para el artículo '{itemId}' en este momento.",
+                    "GetItemGuillotineShears");
+            }
+        }
 
         public async Task<IEnumerable<SierraShearModel>> GetItemSierraShearsAsync(string itemId, CancellationToken cancellationToken)
         {
@@ -376,6 +453,29 @@
                 logger.LogInformation($"Consultando datos de materiales de sierra para el artículo '{itemId}'.");
 
                 return (await GetAsync<IEnumerable<SierraShearModel>>($"insulations/sierraShears/{itemId}", cancellationToken)
+                    .ConfigureAwait(false)) ?? Enumerable.Empty<SierraShearModel>();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Ocurrió un error al consultar datos de los materiales de sierra para el artículo '{itemId}'.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    $"No se pueden consultar los datos de los materiales de sierra para el artículo '{itemId}' en este momento.",
+                    "ItemSierraShears");
+            }
+        }
+        public async Task<IEnumerable<SierraShearModel>> GetItemSierraShearsAsync_sqlctp(string itemId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                logger.LogInformation($"Consultando datos de materiales de sierra para el artículo '{itemId}'.");
+
+                return (await GetAsync<IEnumerable<SierraShearModel>>($"insulations/sierraShears_sqlctp/{itemId}", cancellationToken)
                     .ConfigureAwait(false)) ?? Enumerable.Empty<SierraShearModel>();
             }
             catch (Exception ex)

@@ -45,6 +45,16 @@
 
             return Ok(result);
         }
+        [Route("manufacturing/daterange_discpiso")]
+        [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<DateRangeAvailableModel>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<IEnumerable<DateRangeAvailableModel>>> DateRangeAvailableForTestQuery_discpiso()
+        {
+            IEnumerable<DateRangeAvailableModel> result = await service.GetDateRangeAvailableForTestQueryAsync_discpiso()
+                .ConfigureAwait(false);
+
+            return Ok(result);
+        }
 
         [Route("manufacturing/itemsplanned")]
         [HttpGet]
@@ -53,6 +63,18 @@
         {
             Cores.QueryResult<string> result = await service
                 .GetItemsPlannedToBeManufacturedAsync(page, pageSize, CancellationToken.None)
+                .ConfigureAwait(false);
+
+            return Ok(result);
+        }
+
+        [Route("manufacturing/itemsplanned_discpiso")]
+        [HttpGet]
+        [ProducesResponseType(typeof(Cores.QueryResult<string>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<Cores.QueryResult<string>>> ItemsPlannedToBeManufactured_discpiso(int page = 1, int pageSize = 100)
+        {
+            Cores.QueryResult<string> result = await service
+                .GetItemsPlannedToBeManufacturedAsync_discpiso(page, pageSize, CancellationToken.None)
                 .ConfigureAwait(false);
 
             return Ok(result);
@@ -161,6 +183,18 @@
         {
             ResidentialCoreTestModel? item = await service
                 .GetResidentialCoreTestAsync(testCode)
+                .ConfigureAwait(false);
+
+            return item == null ? NotFound() : Ok(item);
+        }
+
+        [Route("test_discpiso/{testCode}")]
+        [HttpGet]
+        [ProducesResponseType(typeof(ResidentialCoreTestModel), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<ResidentialCoreTestModel?>> CoreTest_discpiso([Required][StringLength(8)] string testCode)
+        {
+            ResidentialCoreTestModel? item = await service
+                .GetResidentialCoreTestAsync_discpiso(testCode)
                 .ConfigureAwait(false);
 
             return item == null ? NotFound() : Ok(item);
@@ -344,6 +378,17 @@
             return Ok(result);
         }
 
+        [Route("manufacturing/daterange_discpiso")]
+        [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<DateRangeAvailableModel>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<IEnumerable<DateRangeAvailableModel>>> DateRangeAvailableForTestQuery_discpiso()
+        {
+            IEnumerable<DateRangeAvailableModel> result = await service.GetDateRangeAvailableForTestQueryAsync_discpiso()
+                .ConfigureAwait(false);
+
+            return Ok(result);
+        }
+
         [Route("manufacturing/itemsplanned")]
         [HttpGet]
         [ProducesResponseType(typeof(Cores.QueryResult<string>), (int)HttpStatusCode.OK)]
@@ -351,6 +396,18 @@
         {
             Cores.QueryResult<string> result = await service
                 .GetItemsPlannedToBeManufacturedAsync(page, pageSize, CancellationToken.None)
+                .ConfigureAwait(false);
+
+            return Ok(result);
+        }
+
+        [Route("manufacturing/itemsplanned_discpiso")]
+        [HttpGet]
+        [ProducesResponseType(typeof(Cores.QueryResult<string>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<Cores.QueryResult<string>>> ItemsPlannedToBeManufactured_discpiso(int page = 1, int pageSize = 100)
+        {
+            Cores.QueryResult<string> result = await service
+                .GetItemsPlannedToBeManufacturedAsync_discpiso(page, pageSize, CancellationToken.None)
                 .ConfigureAwait(false);
 
             return Ok(result);
@@ -482,6 +539,20 @@
         {
             ResidentialCoreTestModel? item = await service
                 .GetResidentialCoreTestAsync(testCode)
+                .ConfigureAwait(false);
+
+            return item == null ? NotFound() : Ok(item);
+        }
+
+        [Route("testing/test_discpiso/{testCode}")]
+        [HttpGet]
+        [ProducesResponseType(
+          typeof(ResidentialCoreTestModel),
+          (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<ResidentialCoreTestModel?>> CoreTest_discpiso([Required][StringLength(8)] string testCode)
+        {
+            ResidentialCoreTestModel? item = await service
+                .GetResidentialCoreTestAsync_discpiso(testCode)
                 .ConfigureAwait(false);
 
             return item == null ? NotFound() : Ok(item);

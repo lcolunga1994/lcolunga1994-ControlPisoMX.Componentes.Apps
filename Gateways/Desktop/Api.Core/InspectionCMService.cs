@@ -212,6 +212,24 @@
                 throw;
             }
         }
+        public async Task AcceptInspectionAsync_discpiso(string itemId, string batch, int serie, string user)
+        {
+            try
+            {
+                ControlPisoMX.InspectionCMS.IMicroservice cores = serviceProvider.GetRequiredService<ControlPisoMX.InspectionCMS.IMicroservice>();
+
+                await cores.AcceptInspectionAsync_discpiso(itemId, batch, serie, user).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                if (ex is not UserException)
+                {
+                    logger.LogError(ex, "Ocurrió un error al aceptar la inspección para la orden:{itemId}-{batch}-{serie}.", itemId, batch, serie);
+                }
+
+                throw;
+            }
+        }
 
         #endregion
 
@@ -223,6 +241,24 @@
             {
                 ControlPisoMX.InspectionCMS.IMicroservice cores = serviceProvider.GetRequiredService<ControlPisoMX.InspectionCMS.IMicroservice>();
                 await cores.RejectInspectionAsync(itemId, batch, serie, machine, user, card, code, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                if (ex is not UserException)
+                {
+                    logger.LogError(ex, $"Ocurrió un error al rechazar la inspección:{itemId}-{batch}-{serie}.");
+                }
+
+                throw;
+            }
+        }
+        public async Task RejectInspectionAsync_discpiso(string itemId, string batch, int serie, string machine, string user, string card, string code, CancellationToken cancellationToken)
+        {
+            try
+            {
+                ControlPisoMX.InspectionCMS.IMicroservice cores = serviceProvider.GetRequiredService<ControlPisoMX.InspectionCMS.IMicroservice>();
+                await cores.RejectInspectionAsync_discpiso(itemId, batch, serie, machine, user, card, code, cancellationToken)
                     .ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -275,6 +311,24 @@
                 ControlPisoMX.InspectionCMS.IMicroservice cores = serviceProvider.GetRequiredService<ControlPisoMX.InspectionCMS.IMicroservice>();
 
                 return await cores.OrderExistsAsync(itemId, batch, serie).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                if (ex is not UserException)
+                {
+                    logger.LogError(ex, $"Ocurrió un error al consultar la información para la orden:{itemId}-{batch}-{serie}.");
+                }
+
+                throw;
+            }
+        }
+        public async Task<bool> OrderExistsAsync_discpiso(string itemId, string batch, int serie)
+        {
+            try
+            {
+                ControlPisoMX.InspectionCMS.IMicroservice cores = serviceProvider.GetRequiredService<ControlPisoMX.InspectionCMS.IMicroservice>();
+
+                return await cores.OrderExistsAsync_discpiso(itemId, batch, serie).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

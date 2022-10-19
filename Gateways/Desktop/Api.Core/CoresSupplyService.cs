@@ -295,6 +295,53 @@
                 throw;
             }
         }
+        public async Task<SupplyCoreResultModel?> SupplyCoresAsync_discpiso(string itemId, string batch, int serie, bool force, string user)
+        {
+            try
+            {
+                ControlPisoMX.Cores.IMicroservice cores = serviceProvider.GetRequiredService<ControlPisoMX.Cores.IMicroservice>();
+
+                ControlPisoMX.Cores.Models.Residential.SupplyCoreResultModel? preview = (await cores.SupplyCoresAsync_discpiso(itemId, batch, serie, force, user)
+                    .ConfigureAwait(false));
+                if (preview is not null)
+                {
+#pragma warning disable CS8602 // Desreferencia de una referencia posiblemente NULL.
+                    return new SupplyCoreResultModel(preview.ItemId, preview.Batch, preview.Serie,
+                        new SupplyCoresValidationModel(preview.SupplyValidationResult.Phases,
+                            preview.SupplyValidationResult.CoreNumber, preview.SupplyValidationResult.Validation
+                                .Select(e => new CoreValidationModel(e.CoreIndex, e.TestCode, e.Color, e.ColorSugetions)).ToList()
+                               , preview.SupplyValidationResult.IsPhasesRuleValid, preview.SupplyValidationResult.IsCoreColorRuleValid,
+                            preview.SupplyValidationResult.Accomplished, preview.SupplyValidationResult.Message),
+                        new MOSupplyItemTagModel()
+                        {
+                            ItemId = preview.Printable.ItemId,
+                            Batch = preview.Printable.Batch,
+                            Serie = preview.Printable.Serie,
+                            Sequence = preview.Printable.Sequence,
+                            ScheduledDate = preview.Printable.ScheduledDate,
+                            Machine = preview.Printable.Machine,
+                            ProductLine = preview.Printable.ProductLine,
+                            Line = preview.Printable.Line,
+                            Attributes = preview.Printable.Attributes.Select(e => new MOSupplyItemPrintableAttributeModel()
+                            { Attribute = e.Attribute, Value = e.Value }).ToList()
+                        });
+#pragma warning restore CS8602 // Desreferencia de una referencia posiblemente NULL.
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex is not UserException)
+                {
+                    logger.LogError(ex, "Ocurrió un error al suministrar núcleos '{itemId}-{batch}-{serie}'.", itemId, batch, serie);
+                }
+
+                throw;
+            }
+        }
 
         public async Task ReprintAsync(Guid manufacturingOrderId, string user)
         {

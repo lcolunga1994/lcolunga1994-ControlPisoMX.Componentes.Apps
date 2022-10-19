@@ -21,8 +21,10 @@
         #region Plan
 
         Task<IEnumerable<DateRangeAvailableModel>> GetDateRangeAvailableForTestQueryAsync();
+        Task<IEnumerable<DateRangeAvailableModel>> GetDateRangeAvailableForTestQueryAsync_discpiso();
 
         Task<Cores.QueryResult<string>> GetItemsPlannedToBeManufacturedAsync(int page, int pageSize, CancellationToken cancellationToken);
+        Task<Cores.QueryResult<string>> GetItemsPlannedToBeManufacturedAsync_discpiso(int page, int pageSize, CancellationToken cancellationToken);
 
         Task<Cores.QueryResult<ManufacturedResidentialCoreModel>> GetManufacturedCoresAsync(
             int page,
@@ -60,6 +62,7 @@
             CancellationToken cancellationToken);
 
         Task<ResidentialCoreTestModel?> GetResidentialCoreTestAsync(string testCode);
+        Task<ResidentialCoreTestModel?> GetResidentialCoreTestAsync_discpiso(string testCode);
 
         Task<ResidentialCoreSuggestedCodeResultModel?> GetResidentialCoreSuggestedCodeResultAsync(string testCode);
 

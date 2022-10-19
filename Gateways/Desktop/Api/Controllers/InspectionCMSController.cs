@@ -116,6 +116,16 @@
 
             return Ok();
         }
+        [Route("accept_discpiso")]
+        [HttpPost]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+
+        public async Task<ActionResult> AcceptInspection_discpiso(string itemId, string batch, int serie, string user)
+        {
+            await service.AcceptInspectionAsync_discpiso(itemId, batch, serie, user);
+
+            return Ok();
+        }
 
         [Route("rejected")]
         [HttpPost]
@@ -123,6 +133,16 @@
         public async Task<ActionResult> Rejected(RejectInspectionParameter parameters)
         {
             await service.RejectInspectionAsync(parameters.ItemId, parameters.Batch, parameters.Serie, parameters.Machine, parameters.User, parameters.Card, parameters.Code, CancellationToken.None)
+                        .ConfigureAwait(false);
+            return Ok();
+        }
+
+        [Route("rejected_discpiso")]
+        [HttpPost]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        public async Task<ActionResult> Rejected_discpiso(RejectInspectionParameter parameters)
+        {
+            await service.RejectInspectionAsync_discpiso(parameters.ItemId, parameters.Batch, parameters.Serie, parameters.Machine, parameters.User, parameters.Card, parameters.Code, CancellationToken.None)
                         .ConfigureAwait(false);
             return Ok();
         }
@@ -139,7 +159,17 @@
             return Ok(result);
         }
 
+        [Route("orderexists_discpiso")]
+        [HttpGet]
+        [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
 
+        public async Task<ActionResult<bool>> GetItemOrderExists_discpiso(string itemId, string batch, int serie)
+        {
+            bool result = await service.OrderExistsAsync_discpiso(itemId, batch, serie)
+                 .ConfigureAwait(false);
+
+            return Ok(result);
+        }
 
         [Route("lastrejected")]
         [HttpGet]

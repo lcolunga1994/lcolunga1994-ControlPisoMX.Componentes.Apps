@@ -52,6 +52,25 @@
                 throw CreateServiceException("No se puede confirmar el suministro de la orden en este momento.", "AcceptInspection");
             }
         }
+        public async Task AcceptInspectionAsync_discpiso(string itemId, string batch, int serie, string user)
+        {
+            try
+            {
+                await PostAsync($"inspectionCMS/accept_discpiso?itemId={itemId}&batch={batch}&serie={serie}&user={user}")
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                logger.LogError(ex, "Ocurrió un error al confirmar el suministro de la orden '{itemId}-{batch}-{serie}'.", itemId, batch, serie);
+
+                throw CreateServiceException("No se puede confirmar el suministro de la orden en este momento.", "AcceptInspection");
+            }
+        }
 
         public async Task RejectInspectionAsync(string itemId, string batch, int serie, string machine, string user, string card, string code, CancellationToken cancellationToken)
         {
@@ -72,12 +91,50 @@
                 throw CreateServiceException("No se puede rechazar la inspección en este momento.", "RejectInspection");
             }
         }
+        public async Task RejectInspectionAsync_discpiso(string itemId, string batch, int serie, string machine, string user, string card, string code, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await PostAsync($"inspectionCMS/rejected_discpiso", new RejectInspectionParameter(itemId, batch, serie, machine, user, card, code), cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                logger.LogError(ex, "Ocurrió un error al rechazar la inspección '{itemId}-{batch}-{serie}'.", itemId, batch, serie);
+
+                throw CreateServiceException("No se puede rechazar la inspección en este momento.", "RejectInspection");
+            }
+        }
 
         public async Task<bool> OrderExistsAsync(string itemId, string batch, int serie)
         {
             try
             {
                 return await GetAsync<bool>($"inspectionCMS/orderexists?itemId={itemId}&batch={batch}&serie={serie}", CancellationToken.None)
+                  .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                logger.LogError(ex, "Ocurrió un error al consultar la orden '{itemId}-{batch}-{serie}'.", itemId, batch, serie);
+
+                throw CreateServiceException("No se puede consultar la orden en este momento.", "OrderExist");
+            }
+        }
+        public async Task<bool> OrderExistsAsync_discpiso(string itemId, string batch, int serie)
+        {
+            try
+            {
+                return await GetAsync<bool>($"inspectionCMS/orderexists_discpiso?itemId={itemId}&batch={batch}&serie={serie}", CancellationToken.None)
                   .ConfigureAwait(false);
             }
             catch (Exception ex)

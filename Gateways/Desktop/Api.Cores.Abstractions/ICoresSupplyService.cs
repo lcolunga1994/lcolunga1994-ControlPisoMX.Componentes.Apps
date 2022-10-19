@@ -22,6 +22,8 @@
 
         Task<SupplyCoreResultModel?> SupplyCoresAsync(string itemId, string batch, int serie, bool force, string user);
 
+        Task<SupplyCoreResultModel?> SupplyCoresAsync_discpiso(string itemId, string batch, int serie, bool force, string user);
+
         Task ReprintAsync(Guid manufacturingOrderId, string user);
     }
 }
