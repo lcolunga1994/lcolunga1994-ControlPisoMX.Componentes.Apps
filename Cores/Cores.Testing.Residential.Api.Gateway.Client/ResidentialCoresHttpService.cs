@@ -118,6 +118,36 @@
                     "DateRangeAvailableForTest");
             }
         }
+        public async Task<IEnumerable<DateRangeAvailableModel>> GetDateRangeAvailableForTestQueryAsync_discpiso()
+        {
+            try
+            {
+                logger.LogInformation($"Consultando el rango de fechas disponibles para probar en el plan de fabricación.");
+
+                IEnumerable<DateRangeAvailableModel>? result = await GetAsync<IEnumerable<DateRangeAvailableModel>?>("cores/residential/manufacturing/daterange_discpiso", CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                if (result == null)
+                {
+                    return Enumerable.Empty<DateRangeAvailableModel>();
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Ocurrió un error al consultar el rango de fechas disponibles para probar en el plan de fabricación.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    "No se puede consultar el rango de fechas disponibles para probar en este momento.",
+                    "DateRangeAvailableForTest");
+            }
+        }
 
         public async Task<Cores.QueryResult<string>> GetItemsPlannedToBeManufacturedAsync(
            int page,
@@ -129,6 +159,40 @@
                 logger.LogInformation($"Consultando los artículos planeados para la fabricación de núcleos: página:{page} tamaño:{pageSize}.");
 
                 Cores.QueryResult<string>? result = await GetAsync<Cores.QueryResult<string>>($"cores/residential/manufacturing/itemsplanned?page={page}&pageSize={pageSize}", cancellationToken)
+                .ConfigureAwait(false);
+
+                if (result == null)
+                {
+                    return new Cores.QueryResult<string>();
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Ocurrió un error al consultar los artículos planeados para la fabricación de núcleos: página:{page} tamaño:{pageSize}.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    "No se pueden consultar los artículos planeados para la fabricación de núcleos en este momento.",
+                    "ComponentsCoresTestingPlan");
+            }
+        }
+
+        public async Task<Cores.QueryResult<string>> GetItemsPlannedToBeManufacturedAsync_discpiso(
+           int page,
+           int pageSize,
+           CancellationToken cancellationToken)
+        {
+            try
+            {
+                logger.LogInformation($"Consultando los artículos planeados para la fabricación de núcleos: página:{page} tamaño:{pageSize}.");
+
+                Cores.QueryResult<string>? result = await GetAsync<Cores.QueryResult<string>>($"cores/residential/manufacturing/itemsplanned_discpiso?page={page}&pageSize={pageSize}", cancellationToken)
                 .ConfigureAwait(false);
 
                 if (result == null)
@@ -337,6 +401,32 @@
                 logger.LogInformation($"Consultando resultado de la prueba con código '{testCode}' realizada a un núcleo residencial");
 
                 return await GetAsync<ResidentialCoreTestModel?>($"cores/residential/testing/test/{testCode}", CancellationToken.None)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(
+                    ex,
+                    $"Ocurrió un error al consultar el resultado de la prueba con código '{testCode}' realizada a un núcleo residencial");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    $"No se pueden consultar el resultado de la prueba con código '{testCode}' realizada a un núcleo residencial en este momento.",
+                    "ResidentialCoreTestResult");
+            }
+        }
+
+        public async Task<ResidentialCoreTestModel?> GetResidentialCoreTestAsync_discpiso(string testCode)
+        {
+            try
+            {
+                logger.LogInformation($"Consultando resultado de la prueba con código '{testCode}' realizada a un núcleo residencial");
+
+                return await GetAsync<ResidentialCoreTestModel?>($"cores/residential/testing/test_discpiso/{testCode}", CancellationToken.None)
                     .ConfigureAwait(false);
             }
             catch (Exception ex)

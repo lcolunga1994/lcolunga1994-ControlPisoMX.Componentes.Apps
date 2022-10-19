@@ -216,6 +216,27 @@
                     "SupplyCores");
             }
         }
+        public async Task<SupplyCoreResultModel?> SupplyCoresAsync_discpiso(string itemId, string batch, int serie, bool force, string user)
+        {
+            try
+            {
+                return await PostAsync<SupplyCoreResultModel>($"cores/supply/SupplyCores_discpiso/{itemId}/{batch}/{serie}/{force}/{user}", CancellationToken.None)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                logger.LogError(ex, "Ocurrió un error al suministrar núcleos {itemId}-{batch}-{serie} {user}'.", itemId, batch, serie, user);
+
+                throw CreateServiceException(
+                    "No se pueden suministrar núcleos.",
+                    "SupplyCores");
+            }
+        }
 
         public async Task ReprintAsync(Guid manufacturingOrderId, string user)
         {
