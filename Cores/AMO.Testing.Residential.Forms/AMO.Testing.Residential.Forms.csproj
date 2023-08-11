@@ -1,0 +1,66 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>Probador_AMO</AssemblyName>
+    <RootNamespace>ProlecGE.ControlPisoMX.AMO.Testing.Residential.Forms</RootNamespace>
+    <UserSecretsId>2e9857f9-763e-4f68-a428-221dba4d4544</UserSecretsId>
+  </PropertyGroup>
+	<ItemGroup>
+		<None Remove="appsettings.Development.json" />
+		<None Remove="appsettings.json" />
+		<None Remove="appsettings.Local.json" />
+		<None Remove="appsettings.QA.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="appsettings.Development.json" Condition=" '$(Configuration)' == 'Debug'">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="appsettings.QA.json" Condition=" '$(Configuration)' == 'Debug'">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="appsettings.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
+    <PackageReference Include="System.IO.FileSystem.AccessControl" Version="6.0.0-preview.5.21301.5" />
+    <PackageReference Include="System.IO.Ports" Version="7.0.0-rc.2.22472.3" />
+  </ItemGroup>
+	<ItemGroup Condition="'$(Configuration)'=='Monolithic'">
+		<ProjectReference Include="..\..\..\Gateways\Components\Web\Api.Monolithic\BFWeb.Components.Api.Monolithic.csproj" />
+		<ProjectReference Include="..\..\..\Services\AppSettings\CoresTesting\Api.Core\CoresTesting.Settings.Api.Core.csproj" />
+	</ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Cores.Common\Cores.Common.csproj" />
+    <ProjectReference Include="..\Cores.Testing.Residential.Api.Gateway.Client\Cores.Api.Gateway.Residential.Client.csproj" />
+    <ProjectReference Include="..\Cores.Testing.Residential.Shared\Cores.Testing.Residential.Shared.csproj" />
+  </ItemGroup>
+	<ItemGroup>
+		<Compile Update="Properties\Resources.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Resources.resx</DependentUpon>
+		</Compile>
+	</ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Update="Properties\Resources.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+	</ItemGroup>
+	<ItemGroup>
+		<Folder Include="Resources\NewFolder\" />
+	</ItemGroup>
+
+</Project>

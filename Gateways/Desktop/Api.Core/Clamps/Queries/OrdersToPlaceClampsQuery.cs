@@ -7,7 +7,7 @@
     using System.Threading.Tasks;
 
     using MediatR;
-
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
 
     using ProlecGE.ControlPisoMX.BFWeb.Components.Models;
@@ -22,6 +22,7 @@
         private readonly ILogger<OrdersToPlaceClampsQueryHandler> logger;
         private readonly ControlPisoMX.Cores.IMicroservice cores;
         private readonly ControlPisoMX.ERP.IMicroservice erp;
+        private readonly IConfiguration _configuration;
 
         #endregion
 
@@ -30,11 +31,13 @@
         public OrdersToPlaceClampsQueryHandler(
             ILogger<OrdersToPlaceClampsQueryHandler> logger,
             ControlPisoMX.Cores.IMicroservice cores,
-            ControlPisoMX.ERP.IMicroservice erp)
+            ControlPisoMX.ERP.IMicroservice erp,
+            IConfiguration configuration)
         {
             this.logger = logger;
             this.cores = cores;
             this.erp = erp;
+            _configuration = configuration;
         }
 
         #endregion
@@ -55,15 +58,15 @@
 
                 foreach (var order in orders)
                 {
-                    ERP.Models.ItemModel? item = await erp
-                       .GetItemAsync(order.ItemId, CancellationToken.None)
-                       .ConfigureAwait(false);
+                    ERP.Models.ItemModel? item = bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()) ? 
+                        await erp.GetItemAsync(order.ItemId, CancellationToken.None).ConfigureAwait(false)
+                      : await erp.GetItemAsync_discpiso(order.ItemId, CancellationToken.None).ConfigureAwait(false);
 
                     if (item is not null)
                     {
-                        IEnumerable<ControlPisoMX.ERP.Models.ItemClampModel> itemClamps = await erp
-                            .GetItemClampsAsync(order.ItemId, CancellationToken.None)
-                            .ConfigureAwait(false);
+                        IEnumerable<ControlPisoMX.ERP.Models.ItemClampModel> itemClamps = bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()) ?
+                            await erp.GetItemClampsAsync(order.ItemId, CancellationToken.None).ConfigureAwait(false):
+                            await erp.GetItemClampsAsync_LN(order.ItemId,int.Parse(_configuration.GetSection("Cia").Value.ToString()), CancellationToken.None).ConfigureAwait(false);                        
 
                         result.Add(new OrderWithClampsModel()
                         {

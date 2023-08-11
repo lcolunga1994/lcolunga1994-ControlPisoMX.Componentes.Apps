@@ -4,7 +4,7 @@
     using System.Threading.Tasks;
 
     using MediatR;
-
+    using Microsoft.Extensions.Configuration;
     using Models;
     using ProlecGE.ControlPisoMX.BFWeb.Components;
 
@@ -37,16 +37,16 @@
         #region Fields
 
         private readonly ControlPisoMX.Cores.IMicroservice cores; 
-        private readonly AppSettings _appSettings;
+        private readonly IConfiguration _configuration;
 
         #endregion
 
         #region Constructor
 
-        public IndustrialCoreVoltageDesignQueryHandler(ControlPisoMX.Cores.IMicroservice cores, AppSettings _appSettings)
+        public IndustrialCoreVoltageDesignQueryHandler(ControlPisoMX.Cores.IMicroservice cores, IConfiguration configuration)
         {
             this.cores = cores;
-            this._appSettings = _appSettings;
+            this._configuration = configuration;
         }
 
         #endregion
@@ -59,48 +59,30 @@
         {
             IndustrialItemVoltageDesignModel? result = null;
 
-            if (_appSettings.AmbientERP)
-            {
-                ControlPisoMX.Cores.Models.IndustrialItemVoltageDesignModel? itemVoltage = await cores
-                .GetIndustrialCoreVoltageDesignAsync(request.ItemId, request.CoreSize, request.FoilWidth)
-                .ConfigureAwait(false);
+            ControlPisoMX.Cores.Models.IndustrialItemVoltageDesignModel? itemVoltage =
+                    (bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()))?
+                    await cores
+                    .GetIndustrialCoreVoltageDesignAsync(request.ItemId, request.CoreSize, request.FoilWidth)
+                    .ConfigureAwait(false)
+                    : await cores
+                    .GetIndustrialCoreVoltageDesignAsync_sqlctp(request.ItemId, request.CoreSize, request.FoilWidth)
+                    .ConfigureAwait(false);
 
-                if (itemVoltage != null)
-                {
-                    result = new IndustrialItemVoltageDesignModel(
-                        itemVoltage.ItemId,
-                        (CoreSizes)itemVoltage.CoreSize,
-                        itemVoltage.FoilWidth,
-                        itemVoltage.KVA,
-                        itemVoltage.PrimaryVoltage,
-                        itemVoltage.SecondaryVoltage,
-                        itemVoltage.TestVoltage,
-                        itemVoltage.MinWattsLimit,
-                        itemVoltage.MaxWattsLimit);
-                }
-            }
-            else
+            if (itemVoltage != null)
             {
-                ControlPisoMX.Cores.Models.IndustrialItemVoltageDesignModel? itemVoltage = await cores
-                .GetIndustrialCoreVoltageDesignAsync_sqlctp(request.ItemId, request.CoreSize, request.FoilWidth)
-                .ConfigureAwait(false);
-
-                if (itemVoltage != null)
-                {
-                    result = new IndustrialItemVoltageDesignModel(
-                        itemVoltage.ItemId,
-                        (CoreSizes)itemVoltage.CoreSize,
-                        itemVoltage.FoilWidth,
-                        itemVoltage.KVA,
-                        itemVoltage.PrimaryVoltage,
-                        itemVoltage.SecondaryVoltage,
-                        itemVoltage.TestVoltage,
-                        itemVoltage.MinWattsLimit,
-                        itemVoltage.MaxWattsLimit);
-                }
+                result = new IndustrialItemVoltageDesignModel(
+                    itemVoltage.ItemId,
+                    (CoreSizes)itemVoltage.CoreSize,
+                    itemVoltage.FoilWidth,
+                    itemVoltage.KVA,
+                    itemVoltage.PrimaryVoltage,
+                    itemVoltage.SecondaryVoltage,
+                    itemVoltage.TestVoltage,
+                    itemVoltage.MinWattsLimit,
+                    itemVoltage.MaxWattsLimit);
             }
 
-            return result;            
+            return result;
         }
 
         #endregion

@@ -216,6 +216,40 @@
                     "ComponentsCoresTestingPlan");
             }
         }
+        public async Task<Cores.QueryResult<string>> GetItemsPlannedToBeManufacturedAsync_discpiso_AMO(
+           int page,
+           int pageSize,
+           CancellationToken cancellationToken)
+        {
+            try
+            {
+                logger.LogInformation($"Consultando los artículos planeados para la fabricación de núcleos: página:{page} tamaño:{pageSize}.");
+
+                Cores.QueryResult<string>? result = await GetAsync<Cores.QueryResult<string>>($"cores/residential/manufacturing/itemsplanned_discpiso_AMO?page={page}&pageSize={pageSize}", cancellationToken)
+                .ConfigureAwait(false);
+
+                if (result == null)
+                {
+                    return new Cores.QueryResult<string>();
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Ocurrió un error al consultar los artículos planeados para la fabricación de núcleos: página:{page} tamaño:{pageSize}.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    "No se pueden consultar los artículos planeados para la fabricación de núcleos en este momento.",
+                    "ComponentsCoresTestingPlan");
+            }
+        }
+
 
         public async Task<CoreManufacturingPlanModel?> GetNextCoreToBeManufacturedAsync(string itemId, CancellationToken cancellationToken)
         {
@@ -225,6 +259,33 @@
 
                 return await GetAsync<CoreManufacturingPlanModel?>($"cores/residential/manufacturing/nextcore/{itemId}", cancellationToken)
                     .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(
+                    ex,
+                    $"Ocurrió un error al consultar el plan de fabricación del artículo '{itemId}'.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    $"No se puede consultar el plan de fabricación del artículo '{itemId}' en este momento.",
+                    "ComponentsCoresTestingPlanItem");
+            }
+        }
+        public async Task<CoreManufacturingPlanModel?> GetNextCoreToBeManufacturedAsync_AMO(string itemId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                logger.LogInformation($"Consultando el plan de fabricación del artículo '{itemId}'.");
+
+                 var result = await GetAsync<CoreManufacturingPlanModel?>($"cores/residential/manufacturing/nextcore_AMO/{itemId}", cancellationToken)
+                    .ConfigureAwait(false);
+
+                return result;
             }
             catch (Exception ex)
             {
@@ -532,6 +593,66 @@
 
 #pragma warning disable CS8603 // Possible null reference return.
                 return await PostAsync<ResidentialCoreTestResultModel, TestCoreParametersModel>($"cores/residential/testing/test",
+                    new TestCoreParametersModel(
+                        tag,
+                        itemId,
+                        coreSize,
+                        averageVoltage,
+                        rmsVoltage,
+                        current,
+                        temperature,
+                        watts,
+                        coreTemperature,
+                        testCode,
+                        stationId),
+                    cancellationToken)
+                .ConfigureAwait(false);
+#pragma warning restore CS8603 // Possible null reference return.
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Ocurrió un error al probar el núcleo con la etiqueta '{tag}'.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException("No se puede probar el núcleo en este momento.", "ComponentsCoresTest");
+            }
+        }
+        public async Task<ResidentialCoreTestResultModel> TestResidentialCoreAsync_AMO(
+           string? tag,
+           string itemId,
+           int coreSize,
+           double averageVoltage,
+           double rmsVoltage,
+           double current,
+           double temperature,
+           double watts,
+           double coreTemperature,
+           string testCode,
+           string? stationId,
+           CancellationToken cancellationToken)
+        {
+            try
+            {
+                System.Text.StringBuilder stringBuilder = new($"Probando núcleo con la etiqueta '{tag}':");
+                stringBuilder.AppendLine($"Artículo: {itemId}");
+                stringBuilder.AppendLine($"Código: {testCode}");
+                stringBuilder.AppendLine($"Dona: {coreSize}");
+                stringBuilder.AppendLine($"Tensión media: {averageVoltage}");
+                stringBuilder.AppendLine($"Tensión eficaz: {rmsVoltage}");
+                stringBuilder.AppendLine($"Corriente: {current}");
+                stringBuilder.AppendLine($"Temperatura: {temperature}");
+                stringBuilder.AppendLine($"Watts: {watts}");
+                stringBuilder.AppendLine($"Temperatura Termopar: {coreTemperature}");
+                stringBuilder.AppendLine($"Estación: {stationId}");
+
+                logger.LogInformation(stringBuilder.ToString());
+
+#pragma warning disable CS8603 // Possible null reference return.
+                return await PostAsync<ResidentialCoreTestResultModel, TestCoreParametersModel>($"cores/residential/testing/test_AMO",
                     new TestCoreParametersModel(
                         tag,
                         itemId,

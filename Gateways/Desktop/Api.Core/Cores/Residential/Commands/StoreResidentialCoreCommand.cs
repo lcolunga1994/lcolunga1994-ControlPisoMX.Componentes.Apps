@@ -9,6 +9,7 @@ namespace ProlecGE.ControlPisoMX.BFWeb.Components.Cores.Residential.Commands
     using System.Threading;
     using System.Threading.Tasks;
     using MediatR;
+    using Microsoft.Extensions.Configuration;
 
     public class StoreResidentialCoreCommand : IRequest<bool>
     {
@@ -46,14 +47,16 @@ namespace ProlecGE.ControlPisoMX.BFWeb.Components.Cores.Residential.Commands
         #region Fields
 
         private readonly ControlPisoMX.Cores.IMicroservice cores;
+        private readonly IConfiguration _configuration;
 
         #endregion
 
         #region Constructor
 
-        public StoreResidentialCoreCommandHandler(ControlPisoMX.Cores.IMicroservice cores)
+        public StoreResidentialCoreCommandHandler(ControlPisoMX.Cores.IMicroservice cores, IConfiguration configuration)
         {
             this.cores = cores;
+            _configuration = configuration;
         }
 
         #endregion
@@ -62,8 +65,12 @@ namespace ProlecGE.ControlPisoMX.BFWeb.Components.Cores.Residential.Commands
 
         public async Task<bool> Handle(StoreResidentialCoreCommand request, CancellationToken cancellationToken)
         {
-            await cores.StoreResidentialCoreAsync(request.CoreTestId, request.Location, request.AssociatedCode, request.Force)
-                .ConfigureAwait(false);
+            if(bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()))
+                await cores.StoreResidentialCoreAsync(request.CoreTestId, request.Location, request.AssociatedCode, request.Force)
+                    .ConfigureAwait(false);
+            else 
+                await cores.StoreResidentialCoreAsync_sqlctp(request.CoreTestId, request.Location, request.AssociatedCode, request.Force)
+                    .ConfigureAwait(false);
 
             return true;
         }

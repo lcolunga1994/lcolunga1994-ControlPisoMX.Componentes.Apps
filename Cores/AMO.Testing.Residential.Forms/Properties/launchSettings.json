@@ -1,0 +1,22 @@
+{
+  "profiles": {
+    "Cores.Testing.Forms": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "Cores.Testing.Forms.Local": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_Environment": "Local"
+      }
+    },
+    "Probador AMO QA": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_Environment": "QA"
+      }
+    }
+  }
+}

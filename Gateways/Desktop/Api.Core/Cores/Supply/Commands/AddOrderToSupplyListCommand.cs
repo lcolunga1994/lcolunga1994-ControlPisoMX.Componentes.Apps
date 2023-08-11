@@ -7,7 +7,7 @@
     using System.Threading.Tasks;
 
     using MediatR;
-
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
 
     using Models;
@@ -45,6 +45,7 @@
         private readonly ControlPisoMX.Cores.IMicroservice cores;
         private readonly ControlPisoMX.Insulations.IMicroservice insulations;
         private readonly ERP.IMicroservice erp;
+        private readonly IConfiguration _configuration;
 
         #endregion
 
@@ -54,12 +55,14 @@
             ILogger<AddOrderToSupplyListCommandHandler> logger,
             ControlPisoMX.Cores.IMicroservice cores,
             ControlPisoMX.Insulations.IMicroservice insulations,
-            ERP.IMicroservice erp)
+            ERP.IMicroservice erp,
+            IConfiguration configuration)
         {
             this.logger = logger;
             this.cores = cores;
             this.insulations = insulations;
             this.erp = erp;
+            this._configuration = configuration;
         }
 
         #endregion
@@ -80,51 +83,63 @@
 
                     List<MOPrintableAttributeModel> printableAttributes = new();
 
-                    ControlPisoMX.Insulations.Models.ManufacturingPlanItemModel? scheduledOrder = await insulations
+                    ControlPisoMX.Insulations.Models.ManufacturingPlanItemModel? scheduledOrder =
+                        bool.Parse(_configuration.GetSection("UseBaan").Value.ToString())?
+                        await insulations
                         .GetManufacturingPlanBySerieAsync(order.ItemId, order.Batch, order.Serie, order.Sequence, cancellationToken)
+                        .ConfigureAwait(false)
+                        : await insulations
+                        .GetManufacturingPlanBySerieAsync_sqlctp(order.ItemId, order.Batch, order.Serie, order.Sequence, cancellationToken)
                         .ConfigureAwait(false);
 
-                    if (scheduledOrder != null)
-                    {
-                        ControlPisoMX.Insulations.Models.ManufacturingItemModel? insulation = await insulations
-                           .GetManufacturingOrderAsync(scheduledOrder.ItemId, scheduledOrder.Batch, scheduledOrder.Serie, cancellationToken)
-                           .ConfigureAwait(false);
-
-                        if (insulation is not null && (insulation.Status == (int)InsulationsState.Finished || insulation.Status == (int)InsulationsState.InProgress || insulation.Status == (int)InsulationsState.Pending))
-                        {
-                            printableAttributes.Add(new MOPrintableAttributeModel() { Attribute = "Market", Value = scheduledOrder.Market });
-
-                            printableAttributes.AddRange(await erp
-                                .GetMOPrintableAttributesAsync(scheduledOrder.ItemId, scheduledOrder.Batch, scheduledOrder.Serie)
-                                .ConfigureAwait(false));
-
-                            ordersToSupply.Add(new MOSupplyParameterModel(
-                                scheduledOrder.ItemId,
-                                scheduledOrder.Batch,
-                                scheduledOrder.Serie,
-                                scheduledOrder.Sequence,
-                                scheduledOrder.ScheduledDate,
-                                scheduledOrder.Machine,
-                                printableAttributes)
-                            {
-                                ProductLine = scheduledOrder.ProductLine,
-                                Phases = scheduledOrder.Phases
-                            });
-                        }
-                        else
-                        {
-                            throw new UserException($"La fabricación de los aislamientos de la orden {order.ItemId}-{order.Batch}-{order.Serie} no se ha terminado.");
-                        }
-                    }
-                    else
+                    if (scheduledOrder == null)
                     {
                         throw new UserException($"La orden {order.ItemId}-{order.Batch}-{order.Serie} no existe en el programa de fabricación de bobinas.");
                     }
+
+                    ControlPisoMX.Insulations.Models.ManufacturingItemModel? insulation = await insulations
+                        .GetManufacturingOrderAsync(scheduledOrder.ItemId, scheduledOrder.Batch, scheduledOrder.Serie, cancellationToken)
+                        .ConfigureAwait(false);
+
+                    if (!(insulation is not null && (insulation.Status == (int)InsulationsState.Finished || insulation.Status == (int)InsulationsState.InProgress || insulation.Status == (int)InsulationsState.Pending)))
+                    {
+                        throw new UserException($"La fabricación de los aislamientos de la orden {order.ItemId}-{order.Batch}-{order.Serie} no se ha terminado.");
+                    }
+
+                    printableAttributes.Add(new MOPrintableAttributeModel() { Attribute = "Market", Value = scheduledOrder.Market });
+
+                    printableAttributes.AddRange(bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()) ?
+                        await erp
+                    .GetMOPrintableAttributesAsync(scheduledOrder.ItemId, scheduledOrder.Batch, scheduledOrder.Serie)
+                    .ConfigureAwait(false):
+                    await erp
+                    .GetMOPrintableAttributesAsync_LN(scheduledOrder.ItemId, scheduledOrder.Batch, scheduledOrder.Serie,int.Parse(_configuration.GetSection("Cia").Value.ToString()))
+                    .ConfigureAwait(false));
+
+                    ordersToSupply.Add(new MOSupplyParameterModel(
+                            scheduledOrder.ItemId,
+                            scheduledOrder.Batch,
+                            scheduledOrder.Serie,
+                            scheduledOrder.Sequence,
+                            scheduledOrder.ScheduledDate,
+                            scheduledOrder.Machine,
+                            printableAttributes)
+                    {
+                        ProductLine = scheduledOrder.ProductLine,
+                        Phases = scheduledOrder.Phases
+                    });
                 }
 
                 if (ordersToSupply.Any())
                 {
-                    await cores.AddOrdersToSupplyListAsync(ordersToSupply, cancellationToken).ConfigureAwait(false);
+                    if (bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()))
+                    {
+                        await cores.AddOrdersToSupplyListAsync(ordersToSupply, cancellationToken).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        await cores.AddOrdersToSupplyListAsync_sqlctp(ordersToSupply, cancellationToken).ConfigureAwait(false);
+                    }
                 }
 
                 return Unit.Value;

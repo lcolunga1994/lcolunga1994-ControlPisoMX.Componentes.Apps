@@ -17,7 +17,7 @@
 
         private readonly ILogger<PrintInsulationTagForm> printLogger;
         private readonly MediatR.IMediator mediator;
-        private readonly IConfiguration configuration;
+        private readonly IConfiguration _configuration;
         private readonly Services.IInsulationsService insulationsService;
 
         private bool preventCheckUnCheckAllFlag = false;
@@ -36,7 +36,7 @@
         {
             this.printLogger = printLogger;
             this.mediator = mediator;
-            this.configuration = configuration;
+            this._configuration = configuration;
             this.insulationsService = insulationsService;
 
             Orders = new List<DataGridViewItemModel>();
@@ -270,7 +270,7 @@
 
         private void BtnAuthorize_Click(object sender, EventArgs e) => new AuthorizeReprintForm(mediator).Show();
 
-        private void BtnReprintInsulation_Click(object sender, EventArgs e) => new PrintInsulationTagForm(printLogger, configuration, insulationsService).ShowDialog();
+        private void BtnReprintInsulation_Click(object sender, EventArgs e) => new PrintInsulationTagForm(printLogger, _configuration, insulationsService).ShowDialog();
 
         private void BtnOrders_Click(object sender, EventArgs e) => new OrderForms(mediator).Show();
 

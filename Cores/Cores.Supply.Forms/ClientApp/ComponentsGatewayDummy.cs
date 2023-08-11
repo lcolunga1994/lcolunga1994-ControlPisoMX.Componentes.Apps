@@ -437,7 +437,37 @@
         public Task RemoveSupplyCoreAsync(Guid id, CancellationToken cancellationToken) => throw new NotImplementedException();
 
         public Task<SupplyCoreResultModel?> SupplyCoresAsync(string itemId, string batch, int serie, bool force) => throw new NotImplementedException();
-
         #endregion
+        public Task<IEnumerable<DateRangeAvailableModel>> GetDateRangeAvailableForTestQueryAsync_discpiso()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<QueryResult<string>> GetItemsPlannedToBeManufacturedAsync_discpiso(int page, int pageSize, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<QueryResult<string>> GetItemsPlannedToBeManufacturedAsync_discpiso_AMO(int page, int pageSize, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CoreManufacturingPlanModel?> GetNextCoreToBeManufacturedAsync_AMO(string itemId, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ResidentialCoreTestModel?> GetResidentialCoreTestAsync_discpiso(string testCode)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ResidentialCoreTestResultModel> TestResidentialCoreAsync_AMO(string? tag, string itemId, int coreSize, double averageVoltage, double rmsVoltage, double current, double temperature, double watts, double coreTemperature, string testCode, string? stationId, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        
     }
 }

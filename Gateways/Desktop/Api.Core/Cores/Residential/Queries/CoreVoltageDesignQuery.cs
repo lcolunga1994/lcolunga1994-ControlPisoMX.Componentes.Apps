@@ -7,6 +7,7 @@
     using Cores.Models;
 
     using MediatR;
+    using Microsoft.Extensions.Configuration;
     using ProlecGE.ControlPisoMX.BFWeb.Components;
 
     public class CoreVoltageDesignQuery
@@ -38,19 +39,17 @@
         #region Fields
 
         private readonly ERP.IMicroservice erp;
-        private readonly LN.ITtxpcf925Repository ln;
-        private readonly AppSettings _appSettings;
+        private readonly IConfiguration _configuration;
 
         #endregion
 
         #region Constructor
 
         public CoreVoltageDesignQueryHandler(
-            ERP.IMicroservice erp, LN.ITtxpcf925Repository ln, AppSettings _appSettings)
+            ERP.IMicroservice erp,IConfiguration configuration)
         {
             this.erp = erp;
-            this.ln = ln;
-            this._appSettings = _appSettings;
+            this._configuration = configuration;
         }
 
         #endregion
@@ -60,8 +59,10 @@
         public async Task<CoreVoltageDesignModel?> Handle(
             CoreVoltageDesignQuery request, CancellationToken cancellationToken)
         {
-            ERP.Models.ItemModel? item =
+            ERP.Models.ItemModel? item = bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()) ?
                 await erp.GetItemAsync(request.ItemId, cancellationToken)
+                .ConfigureAwait(false):
+                await erp.GetItemAsync_discpiso(request.ItemId, cancellationToken)
                 .ConfigureAwait(false);
 
             if (item == null)
@@ -69,95 +70,33 @@
                 return null;
             }
 
-            if (_appSettings.AmbientERP) //Apunta a ERP BAAN4
-            {
-                ERP.Models.ItemVoltageDesignModel? coreVoltageDesign = await erp
-                .GetItemVoltageDesignAsync(
-                    item.ItemId,
-                    item.DesignId,
-                    request.CoreSize,
-                    cancellationToken)
-                .ConfigureAwait(false);
+            ERP.Models.ItemVoltageDesignModel? coreVoltageDesign = bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()) ?
+            await erp.GetItemVoltageDesignAsync(
+                item.ItemId,
+                item.DesignId,
+                request.CoreSize,
+                cancellationToken).ConfigureAwait(false)
+            :
+            await erp.GetItemVoltageDesignAsync_LN(
+                item.ItemId,
+                item.DesignId,
+                request.CoreSize,
+                int.Parse(_configuration.GetSection("Cia").Value.ToString()),
+                cancellationToken).ConfigureAwait(false);
 
-                return coreVoltageDesign != null
-                    ? new CoreVoltageDesignModel(item.DesignId)
-                    {
-                        KVA = coreVoltageDesign.KVA,
-                        PrimaryVoltage = coreVoltageDesign.PrimaryVoltage,
-                        SecondaryVoltage = coreVoltageDesign.SecondaryVoltage,
-                        TestVoltage = coreVoltageDesign.TestVoltage,
-                        Limits = coreVoltageDesign.Limits
-                            .Select(i => new CoreVoltageLimitModel((CoreLimitColor)i.Color, i.Min, i.Max))
-                            .ToArray()
-                    }
-                    : null;
-            }
-            else //Trae valores de diseño y colores de LN, Luis Colunga, 24/Ago/2022.
-            {
-
-                ProlecGE.ControlPisoMX.BFWeb.Components.Services.LN.Models.ItemVoltageDesignModel? coreVoltageDesign
-                    = await ln.GetItemVoltageDesignAsync(
-                        _appSettings.cia,
-                        item.ItemId,
-                        item.DesignId,
-                        cancellationToken)
-                    .ConfigureAwait(false);
-
-                if (coreVoltageDesign.KVA == 0 && coreVoltageDesign.PrimaryVoltage == 0)
+            return coreVoltageDesign != null
+                ? new CoreVoltageDesignModel(item.DesignId)
                 {
-                    ERP.Models.ItemVoltageDesignModel? coreVoltageDesignERP = await erp
-                                               .GetItemVoltageDesignAsync_sqlctp(
-                                                   item.ItemId,
-                                                   item.DesignId,
-                                                   request.CoreSize,
-                                                   cancellationToken)
-                                               .ConfigureAwait(false);
-                    if (coreVoltageDesignERP is null)
-                        return null;
-                    else
-                    {
-                        return new CoreVoltageDesignModel(item.DesignId)
-                        {
-                            KVA = coreVoltageDesignERP.KVA,
-                            PrimaryVoltage = coreVoltageDesignERP.PrimaryVoltage,
-                            SecondaryVoltage = coreVoltageDesignERP.SecondaryVoltage,
-                            TestVoltage = coreVoltageDesignERP.TestVoltage,
-
-                            Limits = coreVoltageDesignERP.Limits
-                            .Select(i => new CoreVoltageLimitModel((CoreLimitColor)i.Color, i.Min, i.Max))
-                            .ToArray()
-                        };
-                    }
+                    KVA = coreVoltageDesign.KVA,
+                    PrimaryVoltage = coreVoltageDesign.PrimaryVoltage,
+                    SecondaryVoltage = coreVoltageDesign.SecondaryVoltage,
+                    TestVoltage = coreVoltageDesign.TestVoltage,
+                    Limits = coreVoltageDesign.Limits
+                        .Select(i => new CoreVoltageLimitModel((CoreLimitColor)i.Color, i.Min, i.Max))
+                        .ToArray()
                 }
-                else
-                {
-                    return new CoreVoltageDesignModel(item.DesignId)
-                    {
-                        KVA = coreVoltageDesign.KVA,
-                        PrimaryVoltage = coreVoltageDesign.PrimaryVoltage,
-                        SecondaryVoltage = coreVoltageDesign.SecondaryVoltage,
-                        TestVoltage = coreVoltageDesign.TestVoltage,
-
-                        Limits = coreVoltageDesign.Limits
-                            .Select(i => new CoreVoltageLimitModel((CoreLimitColor)i.Color, i.Min, i.Max))
-                            .ToArray()
-                    };
-                }
-
-                //return coreVoltageDesign != null
-                //    ? new CoreVoltageDesignModel(item.DesignId)
-                //    {
-                //        KVA = coreVoltageDesign.KVA,
-                //        PrimaryVoltage = coreVoltageDesign.PrimaryVoltage,
-                //        SecondaryVoltage = coreVoltageDesign.SecondaryVoltage,
-                //        TestVoltage = coreVoltageDesign.TestVoltage,
-
-                //        Limits = coreVoltageDesign.Limits
-                //            .Select(i => new CoreVoltageLimitModel((CoreLimitColor)i.Color, i.Min, i.Max))
-                //            .ToArray()
-                //    }
-                //    : null;
-            }
+                : null;
+            
         }
 
         #endregion

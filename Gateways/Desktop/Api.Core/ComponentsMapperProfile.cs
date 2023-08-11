@@ -47,6 +47,11 @@
             //CreateMap<ControlPisoMX.ERP.Models.AccessoryModel,
             //    Models.AccessoryModel>()
             //    .DisableCtorValidation();
+
+            //LN
+            //CreateMap<ControlPisoMX.ERP.Models.CoresSupply.CoreSupplyTagModel,
+            //    ProlecGE.ControlPisoMX.LN.Models.Supply.CoreSupplyTagModel>()
+            //    .DisableCtorValidation().ReverseMap();
         }
     }
 }

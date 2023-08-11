@@ -30,6 +30,17 @@
             string? stationId,
             CancellationToken cancellationToken);
 
+        Task<ResidentialCoreTestResultModel> TestResidentialCorePatternAsync_sqlctp(
+            string testCode,
+            double averageVoltage,
+            double rmsVoltage,
+            double current,
+            double temperature,
+            double watts,
+            double coreTemperature,
+            string? stationId,
+            CancellationToken cancellationToken);
+
         #endregion
 
         #region Plan
@@ -46,12 +57,17 @@
             int page,
             int pageSize,
             CancellationToken cancellationToken);
+        Task<QueryResult<string>> GetItemsPlannedToBeTestedAsync_discpiso_AMO(
+            int page,
+            int pageSize,
+            CancellationToken cancellationToken);
 
         Task<IEnumerable<CoreManufacturingPlanItemModel>> GetPendingManufacturingPlanAsync(int productLine, CancellationToken cancellationToken);
 
         Task<CoreManufacturingPlanItemModel?> GetNextItemSequenceInPlanAsync(string itemId, CancellationToken cancellationToken);
 
         Task<CoreManufacturingPlanItemModel?> GetNextItemSequenceInPlanAsync_discpiso(string itemId, CancellationToken cancellationToken);
+        Task<CoreManufacturingPlanItemModel?> GetNextItemSequenceInPlanAsync_discpiso_AMO(string itemId, CancellationToken cancellationToken);
 
         #endregion
 
@@ -88,6 +104,25 @@
             string? stationId,
             CancellationToken cancellationToken);
         Task<ResidentialCoreTestResultModel> TestResidentialCoreAsync_sqlctp(
+            string? tag,
+            string itemId,
+            string designId,
+            int coreSize,
+            double? kva,
+            double primaryVoltage,
+            double? secondaryVoltage,
+            double? testVoltage,
+            IEnumerable<ItemVoltageLimitModel> limits,
+            double averageVoltage,
+            double rmsVoltage,
+            double current,
+            double temperature,
+            double watts,
+            double coreTemperature,
+            string testCode,
+            string? stationId,
+            CancellationToken cancellationToken);
+        Task<ResidentialCoreTestResultModel> TestResidentialCoreAsync_sqlctp_AMO(
             string? tag,
             string itemId,
             string designId,
@@ -163,12 +198,17 @@
             string testCode,
             string defect,
             CancellationToken cancellationToken);
+        Task<ResidentialCoreTestResultModel> RegisterDefectAsync_sqlctp(
+           string testCode,
+           string defect,
+           CancellationToken cancellationToken);
 
         #endregion
 
         #region Store
 
         Task StoreResidentialCoreAsync(Guid coreTestId, string location, string? associatedCode, bool force);
+        Task StoreResidentialCoreAsync_sqlctp(Guid coreTestId, string location, string? associatedCode, bool force);
 
         #endregion
 
@@ -181,28 +221,36 @@
         Task<IEnumerable<MOSupplyItemModel>> GetPendingSuppliesAsync(CancellationToken cancellationToken);
 
         Task AddOrdersToSupplyListAsync(List<MOSupplyParameterModel> orders, CancellationToken cancellation);
+        Task AddOrdersToSupplyListAsync_sqlctp(List<MOSupplyParameterModel> orders, CancellationToken cancellation);
 
         Task<MOPrintableModel?> GetSupplyTagAsync(Guid manufacturingOrderId);
 
         Task ConfirmSupplyAsync(string itemId, string batch, int serie);
+        Task ConfirmSupplyAsync_sqlctp(string itemId, string batch, int serie);
 
         Task AuthorizeReprintAsync(string itemId, string batch, int serie);
+        Task AuthorizeReprintAsync_sqlctp(string itemId, string batch, int serie);
 
         Task<IEnumerable<MOSupplyItemModel>> GetSuppliesToReprintAsync();
 
         Task<IEnumerable<ResidentialSuppliedCoreTestModel>> GetResidentialCoreSupplyByOrderAsync(string itemId, string batch, int serie, CancellationToken cancellationToken);
 
         Task AddSupplyCoreAsync(AddSupplyCoreModel supply, CancellationToken cancellationToken);
+        Task AddSupplyCoreAsync_sqlctp(AddSupplyCoreModel supply, CancellationToken cancellationToken);
 
         Task RemoveSupplyCoreAsync(Guid id, CancellationToken cancellationToken);
+        Task RemoveSupplyCoreAsync_sqlctp(Guid id, CancellationToken cancellationToken);
 
         Task<SupplyCoreResultModel?> SupplyCoresAsync(string itemId, string batch, int serie, bool force, string user);
 
         Task<SupplyCoreResultModel?> SupplyCoresAsync_discpiso(string itemId, string batch, int serie, bool force, string user);
+        Task<SupplyCoreResultModel?> SupplyCoresAsync_sqlctp(string itemId, string batch, int serie, bool force, string user);
 
         Task ReprintAsync(Guid manufacturingOrderId, string user);
+        Task ReprintAsync_sqlctp(Guid manufacturingOrderId, string user);
 
         Task RefreshPrintableAttributesAsync(string itemId, string batch, int serie, List<MOPrintableAttributeModel> attributes);
+        Task RefreshPrintableAttributesAsync_sqlctp(string itemId, string batch, int serie, List<MOPrintableAttributeModel> attributes);
 
         #endregion
 
@@ -215,6 +263,16 @@
         Task<IndustrialCorePatternModel?> GetIndustrialCorePatternAsync();
 
         Task<IndustrialCoreTestResultModel> TestIndustrialCorePatternAsync(
+             string testCode,
+             double averageVoltage,
+             double rmsVoltage,
+             double current,
+             double temperature,
+             double watts,
+             double coreTemperature,
+             string? stationId,
+             CancellationToken cancellationToken);
+        Task<IndustrialCoreTestResultModel> TestIndustrialCorePatternAsync_sqlctp(
              string testCode,
              double averageVoltage,
              double rmsVoltage,
@@ -304,7 +362,8 @@
         Task<IEnumerable<MOSupplyItemModel>> GetOrdersToPlaceClampsAsync(CancellationToken cancellationToken);
 
         Task RemoveClampOrderAsync(string itemId, string batch, int serie, int sequence, CancellationToken cancellation);
-        
+        Task RemoveClampOrderAsync_sqlctp(string itemId, string batch, int serie, int sequence, CancellationToken cancellation);
+
 
         #endregion
     }

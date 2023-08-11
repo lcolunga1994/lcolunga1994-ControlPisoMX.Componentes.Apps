@@ -85,6 +85,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clamps.Api.Gateway.Client",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clamps.Forms", "Cores\Clamps.Forms\Clamps.Forms.csproj", "{5253B38F-9DF9-4E7F-A570-4EF21F37D05F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AMO.Testing.Residential.Forms", "Cores\AMO.Testing.Residential.Forms\AMO.Testing.Residential.Forms.csproj", "{52D6CB12-E7B2-4092-84D9-CC32585DD9A9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -197,6 +199,10 @@ Global
 		{5253B38F-9DF9-4E7F-A570-4EF21F37D05F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5253B38F-9DF9-4E7F-A570-4EF21F37D05F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5253B38F-9DF9-4E7F-A570-4EF21F37D05F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52D6CB12-E7B2-4092-84D9-CC32585DD9A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52D6CB12-E7B2-4092-84D9-CC32585DD9A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52D6CB12-E7B2-4092-84D9-CC32585DD9A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52D6CB12-E7B2-4092-84D9-CC32585DD9A9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -241,6 +247,7 @@ Global
 		{1AC08ED0-7AFD-4B0A-912E-C68A28E12263} = {486BA4AE-DB73-4E12-B62F-61CEEB036861}
 		{39245121-4E27-4D69-AAD0-1C2A42D07A72} = {AF4F0A3A-C4AD-4E80-85D4-5228AF89661D}
 		{5253B38F-9DF9-4E7F-A570-4EF21F37D05F} = {AF4F0A3A-C4AD-4E80-85D4-5228AF89661D}
+		{52D6CB12-E7B2-4092-84D9-CC32585DD9A9} = {C056B5D8-782B-437A-A733-578616BEC2AD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E3699644-D089-462E-A156-51B3359E536F}

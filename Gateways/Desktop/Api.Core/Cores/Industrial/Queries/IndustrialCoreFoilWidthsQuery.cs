@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
 
     using MediatR;
+    using Microsoft.Extensions.Configuration;
     using ProlecGE.ControlPisoMX.BFWeb.Components;
 
     public class IndustrialCoreFoilWidthsQuery : IRequest<IEnumerable<double>?>
@@ -33,16 +34,16 @@
         #region Fields
 
         private readonly ControlPisoMX.Cores.IMicroservice cores;
-        private readonly AppSettings _appSettings;
+        private readonly IConfiguration _configuration;
 
         #endregion
 
         #region Constructor
 
-        public IndustrialCoreFoilWidthQueryHandler(ControlPisoMX.Cores.IMicroservice cores, AppSettings _appSettings)
+        public IndustrialCoreFoilWidthQueryHandler(ControlPisoMX.Cores.IMicroservice cores, IConfiguration configuration)
         {
             this.cores = cores;
-            this._appSettings = _appSettings;
+            this._configuration = configuration;
         }
 
         #endregion
@@ -53,7 +54,7 @@
         //    => await cores.GetCoreFoilWidthsAsync(request.ItemId, request.CoreSize)
         //        .ConfigureAwait(false); //Comentarié Luis Colunga 24/ago/2022
         public async Task<IEnumerable<double>?> Handle(IndustrialCoreFoilWidthsQuery request, CancellationToken cancellationToken)
-            => _appSettings.AmbientERP ?
+            => bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()) ?
             await cores.GetCoreFoilWidthsAsync(request.ItemId, request.CoreSize).ConfigureAwait(false)
             : await cores.GetCoreFoilWidthsAsync_sqlctp(request.ItemId, request.CoreSize).ConfigureAwait(false);
 

@@ -25,6 +25,7 @@
 
         Task<Cores.QueryResult<string>> GetItemsPlannedToBeManufacturedAsync(int page, int pageSize, CancellationToken cancellationToken);
         Task<Cores.QueryResult<string>> GetItemsPlannedToBeManufacturedAsync_discpiso(int page, int pageSize, CancellationToken cancellationToken);
+        Task<Cores.QueryResult<string>> GetItemsPlannedToBeManufacturedAsync_discpiso_AMO(int page, int pageSize, CancellationToken cancellationToken);
 
         Task<Cores.QueryResult<ManufacturedResidentialCoreModel>> GetManufacturedCoresAsync(
             int page,
@@ -32,6 +33,7 @@
             CancellationToken cancellationToken);
 
         Task<CoreManufacturingPlanModel?> GetNextCoreToBeManufacturedAsync(string itemId, CancellationToken cancellationToken);
+        Task<CoreManufacturingPlanModel?> GetNextCoreToBeManufacturedAsync_AMO(string itemId, CancellationToken cancellationToken);
 
         #endregion
 
@@ -69,6 +71,19 @@
         Task<ResidentialCoreLocationResultModel?> GetResidentialCoreLocationResultAsync(string testCode);
 
         Task<ResidentialCoreTestResultModel> TestResidentialCoreAsync(
+            string? tag,
+            string itemId,
+            int coreSize,
+            double averageVoltage,
+            double rmsVoltage,
+            double current,
+            double temperature,
+            double watts,
+            double coreTemperature,
+            string testCode,
+            string? stationId,
+            CancellationToken cancellationToken);
+        Task<ResidentialCoreTestResultModel> TestResidentialCoreAsync_AMO(
             string? tag,
             string itemId,
             int coreSize,

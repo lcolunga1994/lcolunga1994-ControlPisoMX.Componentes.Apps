@@ -13,7 +13,7 @@
     {
         #region Fields
 
-        private readonly IConfiguration configuration;
+        private readonly IConfiguration _configuration;
 
         #endregion
 
@@ -21,7 +21,7 @@
 
         public RegisterLastTimeCoreTestWriter(IConfiguration configuration)
         {
-            this.configuration = configuration;
+            this._configuration = configuration;
         }
 
         #endregion
@@ -30,8 +30,8 @@
 
         public async Task WriteAsync(CancellationToken cancellationToken)
         {
-            string? dataCalibrationFolderPath = configuration["CoreTests:DataCalibrationFolderPath"];
-            string? lastTimeTestFileName = configuration["CoreTests:LastTimeTestFileName"];
+            string? dataCalibrationFolderPath = _configuration["CoreTests:DataCalibrationFolderPath"];
+            string? lastTimeTestFileName = _configuration["CoreTests:LastTimeTestFileName"];
 
             if ((!string.IsNullOrWhiteSpace(dataCalibrationFolderPath))
                 && (!string.IsNullOrWhiteSpace(lastTimeTestFileName)))

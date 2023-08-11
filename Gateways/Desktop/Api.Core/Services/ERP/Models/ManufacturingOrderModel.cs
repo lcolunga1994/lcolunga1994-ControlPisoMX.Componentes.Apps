@@ -12,7 +12,7 @@
 
         public int Quantity { get; set; }
 
-        public int SaleId { get; set; }
+        public string SaleId { get; set; } = null!;
 
         public int SaleDetailId { get; set; }
 

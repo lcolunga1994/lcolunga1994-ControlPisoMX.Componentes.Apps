@@ -403,6 +403,43 @@
                     "Machines");
             }
         }
+        public async Task<IEnumerable<ManufacturingPlanItemModel>> GetManufacturingPlanByMachineAsync_sqlctp(DateTime date, string machine, CancellationToken cancellationToken)
+        {
+            try
+            {
+                logger.LogInformation("{message}", $"Consultando el plan de fabricación de la maquina {machine} en la fecha:{date:G}.");
+
+                IEnumerable<ManufacturingPlanItemModel>? result =
+                    await GetAsync<IEnumerable<ManufacturingPlanItemModel>, MachineManufacturingPlanModel>($"insulations/machinemanufacturingPlan_sqlctp",
+                    new MachineManufacturingPlanModel()
+                    {
+                        Machine = machine,
+                        Date = date
+                    },
+                    cancellationToken)
+                    .ConfigureAwait(false);
+
+                if (result == null)
+                {
+                    return Enumerable.Empty<ManufacturingPlanItemModel>();
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "{message}", $"Ocurrió un error al consultar el plan de fabricación de la maquina {machine} en la fecha:{date}.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    $"No se puede consultar el plan de fabricación de la maquina {machine} en este momento.",
+                    "Machines");
+            }
+        }
 
         public async Task<ManufacturingPlanItemModel?> GetManufacturingPlanBySerieAsync(string itemId, string batch, int serie, int sequence, CancellationToken cancellationToken)
         {
@@ -411,6 +448,37 @@
                 logger.LogInformation("Consultando el plan de fabricación para la orden '{itemId}, {batch}-{serie}.", itemId, batch, serie);
 
                 return await GetAsync<ManufacturingPlanItemModel, OrderModel>($"insulations/seriemanufacturingplan",
+                        new OrderModel()
+                        {
+                            ItemId = itemId,
+                            Batch = batch,
+                            Serie = serie,
+                            Sequence = sequence
+                        },
+                        cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Ocurrió un error al consultar el plan de fabricación para la orden '{itemId}, {batch}-{serie}.", itemId, batch, serie);
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    $"No se puede consultar el plan de fabricación para la orden '{itemId}, {batch}-{serie}. en este momento.",
+                    "ManufacturingPlanBySerie");
+            }
+        }
+        public async Task<ManufacturingPlanItemModel?> GetManufacturingPlanBySerieAsync_sqlctp(string itemId, string batch, int serie, int sequence, CancellationToken cancellationToken)
+        {
+            try
+            {
+                logger.LogInformation("Consultando el plan de fabricación para la orden '{itemId}, {batch}-{serie}.", itemId, batch, serie);
+
+                return await GetAsync<ManufacturingPlanItemModel, OrderModel>($"insulations/seriemanufacturingplan_sqlctp",
                         new OrderModel()
                         {
                             ItemId = itemId,

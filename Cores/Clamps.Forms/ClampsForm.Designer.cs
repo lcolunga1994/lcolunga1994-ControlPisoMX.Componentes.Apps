@@ -162,6 +162,7 @@
             // A
             // 
             dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle5.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.A.DefaultCellStyle = dataGridViewCellStyle5;
             this.A.HeaderText = "A";
             this.A.Name = "A";
@@ -172,6 +173,7 @@
             // C
             // 
             dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle6.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.C.DefaultCellStyle = dataGridViewCellStyle6;
             this.C.HeaderText = "C";
             this.C.Name = "C";

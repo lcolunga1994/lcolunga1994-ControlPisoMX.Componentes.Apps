@@ -5,7 +5,7 @@
     using System.Threading.Tasks;
 
     using MediatR;
-
+    using Microsoft.Extensions.Configuration;
     using Residential.Models;
 
     public class TestResidentialCorePatternCommand : IRequest<ResidentialCoreTestResultModel>
@@ -61,6 +61,7 @@
 
         private readonly ControlPisoMX.Cores.IMicroservice cores;
         private readonly ControlPisoMX.I40.IMicroservice i40;
+        private readonly IConfiguration _configuration;
 
         #endregion
 
@@ -68,10 +69,12 @@
 
         public TestResidentialCorePatternCommandHandler(
             ControlPisoMX.Cores.IMicroservice cores,
-            I40.IMicroservice i40)
+            I40.IMicroservice i40,
+            IConfiguration configuration)
         {
             this.cores = cores;
             this.i40 = i40;
+            _configuration = configuration;
         }
 
         #endregion
@@ -80,8 +83,21 @@
 
         public async Task<ResidentialCoreTestResultModel> Handle(TestResidentialCorePatternCommand request, CancellationToken cancellationToken)
         {
-            ControlPisoMX.Cores.Models.ResidentialCoreTestResultModel? coreTestResult = await cores
+            ControlPisoMX.Cores.Models.ResidentialCoreTestResultModel? coreTestResult = bool.Parse(_configuration.GetSection("UseBaan").Value.ToString())?
+                await cores
                 .TestResidentialCorePatternAsync(
+                    request.TestCode,
+                    request.AverageVoltage,
+                    request.RMSVoltage,
+                    request.Current,
+                    request.Temperature,
+                    request.Watts,
+                    request.CoreTemperature,
+                    request.StationId,
+                    cancellationToken)
+                .ConfigureAwait(false):
+                await cores
+                .TestResidentialCorePatternAsync_sqlctp(
                     request.TestCode,
                     request.AverageVoltage,
                     request.RMSVoltage,

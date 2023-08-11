@@ -11,7 +11,7 @@
     using Insulations.Queries;
 
     using MediatR;
-
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
 
@@ -24,7 +24,7 @@
         private readonly ILogger<InsulationsService> logger;
         private readonly IServiceProvider serviceProvider;
         private readonly IMediator mediator;
-        private readonly AppSettings _appSettings;
+        private readonly IConfiguration _configuration;
 
         #endregion
 
@@ -34,12 +34,12 @@
             ILogger<InsulationsService> logger,
             IServiceProvider serviceProvider,
             IMediator mediator,
-            AppSettings _appSettings)
+            IConfiguration configuration)
         {
             this.logger = logger;
             this.serviceProvider = serviceProvider;
             this.mediator = mediator;
-            this._appSettings = _appSettings;
+            this._configuration = configuration;
         }
 
         #endregion
@@ -73,7 +73,7 @@
 
                 ProlecGE.ControlPisoMX.Insulations.IMicroservice insulations = serviceProvider.GetRequiredService<ProlecGE.ControlPisoMX.Insulations.IMicroservice>();
 
-                return (_appSettings.AmbientERP) ? await insulations.ValidateUserPasswordAsync(username, password, cancellationToken).ConfigureAwait(false)
+                return bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()) ? await insulations.ValidateUserPasswordAsync(username, password, cancellationToken).ConfigureAwait(false)
                     : await insulations.ValidateUserPasswordAsync_sqlctp(username, password, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -117,7 +117,7 @@
 
                 ProlecGE.ControlPisoMX.Insulations.IMicroservice insulations = serviceProvider.GetRequiredService<ProlecGE.ControlPisoMX.Insulations.IMicroservice>();
 
-                if (_appSettings.AmbientERP)
+                if(bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()))
                 {
                     await insulations.ChangeAllowManufacturingAsync(allow, cancellationToken)
                     .ConfigureAwait(false);
@@ -247,7 +247,7 @@
 
                 ProlecGE.ControlPisoMX.Insulations.IMicroservice insulations = serviceProvider.GetRequiredService<ProlecGE.ControlPisoMX.Insulations.IMicroservice>();
 
-                if (_appSettings.AmbientERP)
+                if(bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()))
                 {
                     return (await insulations.GetMachinesAsync(cancellationToken)
                         .ConfigureAwait(false))
@@ -396,7 +396,7 @@
 
                 ProlecGE.ControlPisoMX.Insulations.IMicroservice insulations = serviceProvider.GetRequiredService<ProlecGE.ControlPisoMX.Insulations.IMicroservice>();
 
-                IEnumerable<InsulationMachineModel> machines = (_appSettings.AmbientERP) ?
+                IEnumerable<InsulationMachineModel> machines = bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()) ?
                     (await insulations.GetMachinesAsync(cancellationToken)
                     .ConfigureAwait(false))
                     .Select(e => new InsulationMachineModel(e.Number, e.Available))
@@ -443,7 +443,7 @@
                 ControlPisoMX.Cores.IMicroservice cores = serviceProvider.GetRequiredService<ControlPisoMX.Cores.IMicroservice>();
 
                 IEnumerable<ProlecGE.ControlPisoMX.Insulations.Models.ManufacturingPlanItemModel> scheduledOrders =
-                    (_appSettings.AmbientERP) ?
+                    bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()) ?
                      await insulations.GetOrdersToManufactureAsync(utcDate, machine, cancellationToken).ConfigureAwait(false)
                     : await insulations.GetOrdersToManufactureAsync_sqlctp(utcDate, machine, cancellationToken).ConfigureAwait(false);
 
@@ -501,7 +501,7 @@
 
                 ProlecGE.ControlPisoMX.Insulations.IMicroservice insulations = serviceProvider.GetRequiredService<ProlecGE.ControlPisoMX.Insulations.IMicroservice>();
 
-                if (_appSettings.AmbientERP)
+                if(bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()))
                 {
                     await insulations.AddOrdersToManufacturingAsync(insulationOrders).ConfigureAwait(false);
                 }
@@ -526,7 +526,7 @@
                 ControlPisoMX.ERP.IMicroservice erpMicroservice = serviceProvider.GetRequiredService<ControlPisoMX.ERP.IMicroservice>();
                 ProlecGE.ControlPisoMX.Insulations.IMicroservice insulations = serviceProvider.GetRequiredService<ProlecGE.ControlPisoMX.Insulations.IMicroservice>();
 
-                if (_appSettings.AmbientERP)
+                if(bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()))
                 {
                     ControlPisoMX.ERP.Models.ManufacturingOrderModel? manufacturingOrder = await erpMicroservice.GetManufacturingOrderAsync(itemId, batch, cancellationToken);
                     if (manufacturingOrder == null)
@@ -570,7 +570,7 @@
                 ControlPisoMX.ERP.IMicroservice erp = serviceProvider.GetRequiredService<ControlPisoMX.ERP.IMicroservice>();
 
 
-                if (_appSettings.AmbientERP)
+                if(bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()))
                 {
                     await insulations.StartOrderManufacturingAsync(CancellationToken.None).ConfigureAwait(false);
                 }
@@ -597,7 +597,7 @@
 
 
 
-                if (_appSettings.AmbientERP)
+                if(bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()))
                 {
                     await insulations.UpdateOrderManufacturingPriorityAsync(id, priority, cancellationToken)
                     .ConfigureAwait(false);
@@ -627,7 +627,7 @@
                 ControlPisoMX.ERP.IMicroservice erp = serviceProvider.GetRequiredService<ControlPisoMX.ERP.IMicroservice>();
 
 
-                if (_appSettings.AmbientERP)
+                if(bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()))
                 {
                     await insulations.FinishOrderManufacturingAsync(CancellationToken.None)
                     .ConfigureAwait(false);

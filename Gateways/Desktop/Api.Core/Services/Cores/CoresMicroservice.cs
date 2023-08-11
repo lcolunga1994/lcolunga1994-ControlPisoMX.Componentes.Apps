@@ -121,6 +121,60 @@
             }
         }
 
+        public async Task<ResidentialCoreTestResultModel> TestResidentialCorePatternAsync_sqlctp(
+            string testCode,
+            double averageVoltage,
+            double rmsVoltage,
+            double current,
+            double temperature,
+            double watts,
+            double coreTemperature,
+            string? stationId,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                System.Text.StringBuilder stringBuilder = new($"Probando núcleo patrón residencial:");
+                stringBuilder.AppendLine($"Tensión media: {averageVoltage}");
+                stringBuilder.AppendLine($"Tensión eficaz: {rmsVoltage}");
+                stringBuilder.AppendLine($"Corriente: {current}");
+                stringBuilder.AppendLine($"Temperatura: {temperature}");
+                stringBuilder.AppendLine($"Watts: {watts}");
+                stringBuilder.AppendLine($"Temperatura Termopar: {coreTemperature}");
+
+                logger.LogInformation("{message}", stringBuilder.ToString());
+
+#pragma warning disable CS8603 // Possible null reference return.
+                return await PostAsync<ResidentialCoreTestResultModel, Models.TestResidentialCorePatternCommand>(
+                    "residential/testpattern_sqlctp",
+                    new Models.TestResidentialCorePatternCommand(
+                        testCode,
+                        averageVoltage,
+                        rmsVoltage,
+                        current,
+                        temperature,
+                        watts,
+                        coreTemperature,
+                        stationId),
+                    cancellationToken)
+                .ConfigureAwait(false);
+#pragma warning restore CS8603 // Possible null reference return.
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Ocurrió un error al probar el núcleo patrón residencial.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    "No se puede probar el núcleo patrón residencial en este momento.",
+                    "CoresTest");
+            }
+        }
+
         #endregion
 
         #region Plan
@@ -245,6 +299,35 @@
             }
         }
 
+        public async Task<QueryResult<string>> GetItemsPlannedToBeTestedAsync_discpiso_AMO(
+            int page,
+            int pageSize,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                logger.LogInformation("{text}", $"Consultando los artículos planeados para la fabricación de núcleos: página:{page} tamaño:{pageSize}.");
+
+#pragma warning disable CS8603 // Possible null reference return.
+                return await GetAsync<QueryResult<string>>($"residential/manufacturing/itemsplanned_discpiso_AMO?page={page}&pageSize={pageSize}", cancellationToken)
+                .ConfigureAwait(false);
+#pragma warning restore CS8603 // Possible null reference return.
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "{message}", $"Ocurrió un error al consultar los artículos planeados para la fabricación de núcleos: página:{page} tamaño:{pageSize}.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    "No se pueden consultar las etiquetas de los núcleos fabricados en este momento.",
+                    "CoresTestingPlan");
+            }
+        }
+
         public async Task<IEnumerable<CoreManufacturingPlanItemModel>> GetPendingManufacturingPlanAsync(int productLine, CancellationToken cancellationToken)
         {
             try
@@ -309,6 +392,31 @@
                 logger.LogInformation("{message}", $"Consultando el plan de fabricación del artículo '{itemId}'.");
 
                 return await GetAsync<CoreManufacturingPlanItemModel?>($"residential/manufacturing/nextsequence_discpiso/{itemId}", cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(
+                    ex,
+                    "{message}", $"Ocurrió un error al consultar el plan de fabricación del artículo '{itemId}'.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    $"No se puede consultar el plan de fabricación del artículo '{itemId}' en este momento.",
+                    "CoresTestingPlanItem");
+            }
+        }
+        public async Task<CoreManufacturingPlanItemModel?> GetNextItemSequenceInPlanAsync_discpiso_AMO(string itemId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                logger.LogInformation("{message}", $"Consultando el plan de fabricación del artículo '{itemId}'.");
+
+                return await GetAsync<CoreManufacturingPlanItemModel?>($"residential/manufacturing/nextsequence_discpiso_AMO/{itemId}", cancellationToken)
                     .ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -665,6 +773,82 @@
             }
         }
 
+        public async Task<ResidentialCoreTestResultModel> TestResidentialCoreAsync_sqlctp_AMO(
+            string? tag,
+            string itemId,
+            string designId,
+            int coreSize,
+            double? kva,
+            double primaryVoltage,
+            double? secondaryVoltage,
+            double? testVoltage,
+            IEnumerable<ItemVoltageLimitModel> limits,
+            double averageVoltage,
+            double rmsVoltage,
+            double current,
+            double temperature,
+            double watts,
+            double coreTemperature,
+            string testCode,
+            string? stationId,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                System.Text.StringBuilder stringBuilder = new($"Probando núcleo con la etiqueta '{tag}':");
+                stringBuilder.AppendLine($"Artículo: {itemId}");
+                stringBuilder.AppendLine($"Código: {testCode}");
+                stringBuilder.AppendLine($"Dona: {coreSize}");
+                stringBuilder.AppendLine($"Tensión media: {averageVoltage}");
+                stringBuilder.AppendLine($"Tensión eficaz: {rmsVoltage}");
+                stringBuilder.AppendLine($"Corriente: {current}");
+                stringBuilder.AppendLine($"Temperatura: {temperature}");
+                stringBuilder.AppendLine($"Watts: {watts}");
+                stringBuilder.AppendLine($"Temperatura Termopar: {coreTemperature}");
+                stringBuilder.AppendLine($"Estación: {stationId}");
+
+                logger.LogInformation("{message}", stringBuilder.ToString());
+
+#pragma warning disable CS8603 // Possible null reference return.
+                return await PostAsync<ResidentialCoreTestResultModel, Models.TestResidentialCoreCommand>(
+                    "residential/test_sqlctp_AMO",
+                    new Models.TestResidentialCoreCommand(
+                        tag,
+                        itemId,
+                        designId,
+                        coreSize,
+                        kva,
+                        primaryVoltage,
+                        secondaryVoltage,
+                        testVoltage,
+                        limits,
+                        averageVoltage,
+                        rmsVoltage,
+                        current,
+                        temperature,
+                        watts,
+                        coreTemperature,
+                        testCode,
+                        stationId),
+                    cancellationToken)
+                .ConfigureAwait(false);
+#pragma warning restore CS8603 // Possible null reference return.
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "{message}", $"Ocurrió un error al probar el núcleo con la etiqueta '{tag}'.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    "No se puede probar el núcleo en este momento.",
+                    "CoresTest");
+            }
+        }
+
         public async Task<ResidentialCoreTestResultModel> ReworkResidentialCoreAsync(
             string itemId,
             string designId,
@@ -917,6 +1101,44 @@
                     "RegisterDefectAsync");
             }
         }
+        public async Task<ResidentialCoreTestResultModel> RegisterDefectAsync_sqlctp(
+            string testCode,
+            string defect,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                System.Text.StringBuilder stringBuilder = new($"Registrando defecto del núcleo '{testCode}':");
+                stringBuilder.AppendLine($"Defecto: {defect}");
+
+                logger.LogInformation("{message}", stringBuilder.ToString());
+
+#pragma warning disable CS8603 // Possible null reference return.
+
+                return await PostAsync<ResidentialCoreTestResultModel, Models.RegisterDefectCommand>(
+                    "residential/defect_sqlctp",
+                    new Models.RegisterDefectCommand(
+                        testCode,
+                        defect),
+                    cancellationToken)
+                    .ConfigureAwait(false);
+
+#pragma warning restore CS8603 // Possible null reference return.
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "{message}", $"Ocurrió un error al registrar el defecto del núcleo con la nucleo '{testCode}'.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    "No se puede registrar el defecto del núcleo en este momento.",
+                    "RegisterDefectAsync");
+            }
+        }
 
         #endregion
 
@@ -939,6 +1161,39 @@
                 }
 
                 await PostAsync($"residential/store", new Models.StoreCoreModel(coreTestId, location, associatedCode, force), CancellationToken.None)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "{message}", $"Ocurrió un error al acomodar el núcleo con identificador '{coreTestId}'.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    "No se puede acomodar el núcleo en este momento.",
+                    "AccommodateResidentialCore");
+            }
+        }
+        public async Task StoreResidentialCoreAsync_sqlctp(Guid coreTestId, string location, string? associatedCode, bool force)
+        {
+            try
+            {
+                logger.LogInformation("{message}", $"Acomodando el núcleo con identificador '{coreTestId}' en la ubicación '{location}'.");
+
+                if (string.IsNullOrWhiteSpace(location))
+                {
+                    throw new UserException("La ubicación es requerida.");
+                }
+
+                if (!string.IsNullOrWhiteSpace(associatedCode))
+                {
+                    logger.LogInformation("{message}", $"{(force ? "Forzando asociación" : "Asociando")} con núcleo con código de prueba '{associatedCode}'.");
+                }
+
+                await PostAsync($"residential/store_sqlctp", new Models.StoreCoreModel(coreTestId, location, associatedCode, force), CancellationToken.None)
                     .ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -1064,6 +1319,23 @@
                 throw CreateServiceException("No se pueden registrar las ordenes como disponibles para suministrar núcleos en este momento.", "AddOrdersToSupplyList");
             }
         }
+        public async Task AddOrdersToSupplyListAsync_sqlctp(List<MOSupplyParameterModel> orders, CancellationToken cancellation)
+        {
+            try
+            {
+                await PostAsync($"residential/supplylist_sqlctp", orders, CancellationToken.None).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                logger.LogError(ex, "Ocurrió un error al registrar las ordenes como disponibles para suministrar núcleos.");
+                throw CreateServiceException("No se pueden registrar las ordenes como disponibles para suministrar núcleos en este momento.", "AddOrdersToSupplyList");
+            }
+        }
 
         public async Task ConfirmSupplyAsync(string itemId, string batch, int serie)
         {
@@ -1084,12 +1356,51 @@
                 throw CreateServiceException("No se puede confirmar el suministro de la orden en este momento.", "ConfirmSupply");
             }
         }
+        public async Task ConfirmSupplyAsync_sqlctp(string itemId, string batch, int serie)
+        {
+            try
+            {
+                await PostAsync($"supply/confirm_sqlctp/{itemId}/{batch}/{serie}")
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                logger.LogError(ex, "Ocurrió un error al confirmar el suministro de la orden '{itemId}-{batch}-{serie}'.", itemId, batch, serie);
+
+                throw CreateServiceException("No se puede confirmar el suministro de la orden en este momento.", "ConfirmSupply");
+            }
+        }
 
         public async Task AuthorizeReprintAsync(string itemId, string batch, int serie)
         {
             try
             {
                 await PostAsync($"supply/authorizereprint/{itemId}/{batch}/{serie}")
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                logger.LogError(ex, "Ocurrió un error al autorizar la reimpresión de la orden {itemId}-{batch}-{serie}'.", itemId, batch, serie);
+
+                throw CreateServiceException("No se puede autorizar la reimpresión de la orden en este momento.", "AuthorizeReprint");
+            }
+        }
+
+        public async Task AuthorizeReprintAsync_sqlctp(string itemId, string batch, int serie)
+        {
+            try
+            {
+                await PostAsync($"supply/authorizereprint_sqlctp/{itemId}/{batch}/{serie}")
                     .ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -1181,6 +1492,28 @@
                     "AddSupplyCore");
             }
         }
+        public async Task AddSupplyCoreAsync_sqlctp(AddSupplyCoreModel supply, CancellationToken cancellation)
+        {
+            try
+            {
+                logger.LogInformation("Registrando suministro de núcleo.");
+
+                await PostAsync($"residential/addsupplycore_sqlctp/", supply, CancellationToken.None).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Ocurrió un error al registrar el suministro de núcleo.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    "No se pueden registrar el suministro de núcleos en este momento.",
+                    "AddSupplyCore");
+            }
+        }
 
         public async Task RemoveSupplyCoreAsync(Guid id, CancellationToken cancellation)
         {
@@ -1189,6 +1522,28 @@
                 logger.LogInformation("Removiendo suministro de núcleo.");
 
                 await PostAsync($"residential/removesupplycore/", new RemoveSupplyCoreModel(id), CancellationToken.None).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Ocurrió un error al remover el suministro núcleo.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    "No se pueden remover el suministro de núcleo en este momento.",
+                    "RemoveSupplyCore");
+            }
+        }
+        public async Task RemoveSupplyCoreAsync_sqlctp(Guid id, CancellationToken cancellation)
+        {
+            try
+            {
+                logger.LogInformation("Removiendo suministro de núcleo.");
+
+                await PostAsync($"residential/removesupplycore_sqlctp/", new RemoveSupplyCoreModel(id), CancellationToken.None).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -1247,6 +1602,27 @@
                     "SupplyCores");
             }
         }
+        public async Task<SupplyCoreResultModel?> SupplyCoresAsync_sqlctp(string itemId, string batch, int serie, bool force, string user)
+        {
+            try
+            {
+                return await PostAsync<SupplyCoreResultModel?>($"supply/SupplyCores_sqlctp/{itemId}/{batch}/{serie}/{force}/{user}", CancellationToken.None)
+                     .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                logger.LogError(ex, "Ocurrió un error al suministrar los núcleos {itemId}-{batch}-{serie}'.", itemId, batch, serie);
+
+                throw CreateServiceException(
+                    "No se puede suministrar los núcleos en este momento.",
+                    "SupplyCores");
+            }
+        }
 
         public async Task ReprintAsync(Guid manufacturingOrderId, string user)
         {
@@ -1268,11 +1644,59 @@
             }
         }
 
+        public async Task ReprintAsync_sqlctp(Guid manufacturingOrderId, string user)
+        {
+            try
+            {
+                await PostAsync($"supply/reprint_sqlctp/{manufacturingOrderId}/{user}")
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                logger.LogError(ex, "Ocurrió un error al registrar la reimpresión de la orden con id {id}'.", manufacturingOrderId);
+
+                throw CreateServiceException("No se puede registar la reimpresión de la orden en este momento.", "AuthorizeReprint");
+            }
+        }
+
         public async Task RefreshPrintableAttributesAsync(string itemId, string batch, int serie, List<MOPrintableAttributeModel> attributes)
         {
             try
             {
                 await PostAsync<MOPrintableAttributeParameterModel, RefreshPrintableAttributesParameterModel>("supply/refreshprintattributes",
+                    new RefreshPrintableAttributesParameterModel()
+                    {
+                        ItemId = itemId,
+                        Batch = batch,
+                        Serie = serie,
+                        PrintableAttributes = attributes
+                            .Select(i => new MOPrintableAttributeParameterModel() { Attribute = i.Attribute, Value = i.Value })
+                            .ToList()
+                    }, CancellationToken.None)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                logger.LogError(ex, "Ocurrió un error al actualizar los valores para la impresión de la orden {itemId}-{batch}-{serie}'.", itemId, batch, serie);
+
+                throw CreateServiceException($"No se puede actualizar los valores para la impresión de la orden {itemId}-{batch}-{serie} en este momento.", "RefreshPrintableAttributes");
+            }
+        }
+        public async Task RefreshPrintableAttributesAsync_sqlctp(string itemId, string batch, int serie, List<MOPrintableAttributeModel> attributes)
+        {
+            try
+            {
+                await PostAsync<MOPrintableAttributeParameterModel, RefreshPrintableAttributesParameterModel>("supply/refreshprintattributes_sqlctp",
                     new RefreshPrintableAttributesParameterModel()
                     {
                         ItemId = itemId,
@@ -1329,7 +1753,7 @@
                     $"No se pueden consultar las pruebas realizadas al núcleo con al núcleo patrón industrial.",
                     "IndustrialCoreTestsSummary");
             }
-        }
+        }        
 
         public async Task<IndustrialCoreTestResultModel> TestIndustrialCorePatternAsync(
             string testCode,
@@ -1357,6 +1781,59 @@
 #pragma warning disable CS8603 // Possible null reference return.
                 return await PostAsync<IndustrialCoreTestResultModel, Models.TestIndustrialCorePatternParameterModel>(
                     "industrial/testpattern",
+                    new Models.TestIndustrialCorePatternParameterModel(
+                        testCode,
+                        averageVoltage,
+                        rmsVoltage,
+                        current,
+                        temperature,
+                        watts,
+                        coreTemperature,
+                        stationId),
+                    cancellationToken)
+                .ConfigureAwait(false);
+#pragma warning restore CS8603 // Possible null reference return.
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Ocurrió un error al probar el núcleo patrón industrial.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    "No se puede probar el núcleo patrón industrial en este momento.",
+                    "CoresTest");
+            }
+        }
+        public async Task<IndustrialCoreTestResultModel> TestIndustrialCorePatternAsync_sqlctp(
+            string testCode,
+            double averageVoltage,
+            double rmsVoltage,
+            double current,
+            double temperature,
+            double watts,
+            double coreTemperature,
+            string? stationId,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                System.Text.StringBuilder stringBuilder = new($"Probando núcleo patrón industrial:");
+                stringBuilder.AppendLine($"Tensión media: {averageVoltage}");
+                stringBuilder.AppendLine($"Tensión eficaz: {rmsVoltage}");
+                stringBuilder.AppendLine($"Corriente: {current}");
+                stringBuilder.AppendLine($"Temperatura: {temperature}");
+                stringBuilder.AppendLine($"Watts: {watts}");
+                stringBuilder.AppendLine($"Temperatura Termopar: {coreTemperature}");
+
+                logger.LogInformation("{message}", stringBuilder.ToString());
+
+#pragma warning disable CS8603 // Possible null reference return.
+                return await PostAsync<IndustrialCoreTestResultModel, Models.TestIndustrialCorePatternParameterModel>(
+                    "industrial/testpattern_sqlctp",
                     new Models.TestIndustrialCorePatternParameterModel(
                         testCode,
                         averageVoltage,
@@ -1598,7 +2075,7 @@
             double watts,
             double coreTemperature,
             string? stationId,
-            string idSub,
+            string? idSub,
             CancellationToken cancellationToken)
         {
             try
@@ -1664,7 +2141,7 @@
             double watts,
             double coreTemperature,
             string? stationId,
-            string idSub,
+            string? idSub,
             CancellationToken cancellationToken)
         {
             try
@@ -1787,6 +2264,29 @@
                 logger.LogInformation("Removiendo herraje.");
 
                 await PostAsync($"supply/removeclamp/", new OrderModel(itemId, batch, serie, sequence), CancellationToken.None).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Ocurrió un error al remover el herraje.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    "No se pueden remover el herraje.",
+                    "RemoveClamp");
+            }
+        }
+
+        public async Task RemoveClampOrderAsync_sqlctp(string itemId, string batch, int serie, int sequence, CancellationToken cancellation)
+        {
+            try
+            {
+                logger.LogInformation("Removiendo herraje.");
+
+                await PostAsync($"supply/removeclamp_sqlctp/", new OrderModel(itemId, batch, serie, sequence), CancellationToken.None).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

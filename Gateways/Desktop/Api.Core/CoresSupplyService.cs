@@ -7,7 +7,7 @@
     using System.Threading.Tasks;
 
     using MediatR;
-
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
 
@@ -22,6 +22,7 @@
         private readonly IServiceProvider serviceProvider;
         private readonly IMediator mediator;
         private readonly ILogger<CoresSupplyService> logger;
+        private readonly IConfiguration _configuration;
 
         #endregion
 
@@ -30,11 +31,13 @@
         public CoresSupplyService(
             IServiceProvider serviceProvider,
             IMediator mediator,
-            ILogger<CoresSupplyService> logger)
+            ILogger<CoresSupplyService> logger,
+            IConfiguration configuration)
         {
             this.serviceProvider = serviceProvider;
             this.mediator = mediator;
             this.logger = logger;
+            this._configuration = configuration;
         }
 
         #endregion
@@ -181,8 +184,15 @@
             try
             {
                 ControlPisoMX.Cores.IMicroservice cores = serviceProvider.GetRequiredService<ControlPisoMX.Cores.IMicroservice>();
-
-                await cores.ConfirmSupplyAsync(itemId, batch, serie).ConfigureAwait(false);
+                if (bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()))
+                {
+                    await cores.ConfirmSupplyAsync(itemId, batch, serie).ConfigureAwait(false);
+                }
+                else
+                {
+                    await cores.ConfirmSupplyAsync_sqlctp(itemId, batch, serie).ConfigureAwait(false);
+                }
+                
             }
             catch (Exception ex)
             {
@@ -254,7 +264,10 @@
             {
                 ControlPisoMX.Cores.IMicroservice cores = serviceProvider.GetRequiredService<ControlPisoMX.Cores.IMicroservice>();
 
-                ControlPisoMX.Cores.Models.Residential.SupplyCoreResultModel? preview = (await cores.SupplyCoresAsync(itemId, batch, serie, force, user)
+                ControlPisoMX.Cores.Models.Residential.SupplyCoreResultModel? preview = (bool.Parse(_configuration.GetSection("UseBaan").Value.ToString())?
+                    await cores.SupplyCoresAsync(itemId, batch, serie, force, user)
+                    .ConfigureAwait(false):
+                    await cores.SupplyCoresAsync_sqlctp(itemId, batch, serie, force, user)
                     .ConfigureAwait(false));
                 if (preview is not null)
                 {
@@ -349,7 +362,10 @@
             {
                 ControlPisoMX.Cores.IMicroservice cores = serviceProvider.GetRequiredService<ControlPisoMX.Cores.IMicroservice>();
 
-                await cores.ReprintAsync(manufacturingOrderId, user).ConfigureAwait(false);
+                if(bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()))
+                    await cores.ReprintAsync(manufacturingOrderId, user).ConfigureAwait(false);
+                else
+                    await cores.ReprintAsync_sqlctp(manufacturingOrderId, user).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

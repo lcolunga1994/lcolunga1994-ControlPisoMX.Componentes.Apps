@@ -99,6 +99,7 @@
             // 
             // BtnNucleos
             // 
+            this.BtnNucleos.Enabled = false;
             this.BtnNucleos.Location = new System.Drawing.Point(13, 165);
             this.BtnNucleos.Name = "BtnNucleos";
             this.BtnNucleos.Size = new System.Drawing.Size(185, 45);

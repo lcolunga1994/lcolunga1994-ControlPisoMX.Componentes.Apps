@@ -67,6 +67,7 @@
 
             return Ok(result);
         }
+        
 
         [Route("manufacturing/itemsplanned_discpiso")]
         [HttpGet]
@@ -79,6 +80,19 @@
 
             return Ok(result);
         }
+
+        [Route("manufacturing/itemsplanned_discpiso_AMO")]
+        [HttpGet]
+        [ProducesResponseType(typeof(Cores.QueryResult<string>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<Cores.QueryResult<string>>> ItemsPlannedToBeManufactured_discpiso_AMO (int page = 1, int pageSize = 100)
+        {
+            Cores.QueryResult<string> result = await service
+                .GetItemsPlannedToBeManufacturedAsync_discpiso_AMO(page, pageSize, CancellationToken.None)
+                .ConfigureAwait(false);
+
+            return Ok(result);
+        }
+
 
         [Route("manufactured")]
         [HttpGet]
@@ -106,6 +120,17 @@
         {
             CoreManufacturingPlanModel? result = await service
                 .GetNextCoreToBeManufacturedAsync(itemId.Trim(), CancellationToken.None)
+                .ConfigureAwait(false);
+
+            return result == null ? NotFound() : Ok(result);
+        }
+        [Route("manufacturing/nextcore_AMO/{itemId}")]
+        [HttpGet]
+        [ProducesResponseType(typeof(CoreManufacturingPlanModel), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<CoreManufacturingPlanModel?>> NextCoreToBeManufactured_AMO([Required][StringLength(47)] string itemId)
+        {
+            CoreManufacturingPlanModel? result = await service
+                .GetNextCoreToBeManufacturedAsync_AMO(itemId.Trim(), CancellationToken.None)
                 .ConfigureAwait(false);
 
             return result == null ? NotFound() : Ok(result);
@@ -412,6 +437,17 @@
 
             return Ok(result);
         }
+        [Route("manufacturing/itemsplanned_discpiso_AMO")]
+        [HttpGet]
+        [ProducesResponseType(typeof(Cores.QueryResult<string>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<Cores.QueryResult<string>>> ItemsPlannedToBeManufactured_discpiso_AMO(int page = 1, int pageSize = 100)
+        {
+            Cores.QueryResult<string> result = await service
+                .GetItemsPlannedToBeManufacturedAsync_discpiso_AMO(page, pageSize, CancellationToken.None)
+                .ConfigureAwait(false);
+
+            return Ok(result);
+        }
 
         [Route("testing/manufactured")]
         [HttpGet]
@@ -439,6 +475,18 @@
         {
             CoreManufacturingPlanModel? result = await service
                 .GetNextCoreToBeManufacturedAsync(itemId.Trim(), CancellationToken.None)
+                .ConfigureAwait(false);
+
+            return result == null ? NotFound() : Ok(result);
+        }
+
+        [Route("manufacturing/nextcore_AMO/{itemId}")]
+        [HttpGet]
+        [ProducesResponseType(typeof(CoreManufacturingPlanModel), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<CoreManufacturingPlanModel?>> NextCoreToBeManufactured_AMO([Required][StringLength(47)] string itemId)
+        {
+            CoreManufacturingPlanModel? result = await service
+                .GetNextCoreToBeManufacturedAsync_AMO(itemId.Trim(), CancellationToken.None)
                 .ConfigureAwait(false);
 
             return result == null ? NotFound() : Ok(result);
@@ -600,6 +648,36 @@
 
             ResidentialCoreTestResultModel result = await service
                 .TestResidentialCoreAsync(
+                    command.Tag,
+                    command.ItemId,
+                    command.CoreSize,
+                    command.AverageVoltage,
+                    command.RMSVoltage,
+                    command.Current,
+                    command.Temperature,
+                    command.Watts,
+                    command.CoreTemperature,
+                    command.TestCode,
+                    command.StationId,
+                    CancellationToken.None);
+
+            return Ok(result);
+        }
+
+        [Route("testing/test_AMO")]
+        [HttpPost]
+        [ProducesResponseType(
+            typeof(ResidentialCoreTestResultModel),
+            (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<ResidentialCoreTestResultModel>> TestCore_AMO(TestCoreParametersModel command)
+        {
+            if (command is null)
+            {
+                return BadRequest();
+            }
+
+            ResidentialCoreTestResultModel result = await service
+                .TestResidentialCoreAsync_AMO(
                     command.Tag,
                     command.ItemId,
                     command.CoreSize,

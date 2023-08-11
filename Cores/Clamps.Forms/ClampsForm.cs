@@ -68,7 +68,11 @@ namespace ProlecGE.ControlPisoMX.Clamps.Forms
             Serie.DataPropertyName = nameof(DataGridViewItemModel.SerieString);
             Herraje.DataPropertyName = nameof(DataGridViewItemModel.Position);
             A.DataPropertyName = nameof(DataGridViewItemModel.A);
+            A.DefaultCellStyle.Font = new Font(grItems.Font.FontFamily, A.DefaultCellStyle.Font.Size + 2, FontStyle.Bold);
+            A.HeaderCell.Style.Font = new Font(grItems.Font.FontFamily, A.DefaultCellStyle.Font.Size + 2, FontStyle.Bold);
             C.DataPropertyName = nameof(DataGridViewItemModel.C);
+            C.DefaultCellStyle.Font = new Font(grItems.Font.FontFamily, C.DefaultCellStyle.Font.Size + 2, FontStyle.Bold);
+            C.HeaderCell.Style.Font = new Font(grItems.Font.FontFamily, C.DefaultCellStyle.Font.Size + 2, FontStyle.Bold);
             E.DataPropertyName = nameof(DataGridViewItemModel.E);
             K.DataPropertyName = nameof(DataGridViewItemModel.K);
             L.DataPropertyName = nameof(DataGridViewItemModel.L);

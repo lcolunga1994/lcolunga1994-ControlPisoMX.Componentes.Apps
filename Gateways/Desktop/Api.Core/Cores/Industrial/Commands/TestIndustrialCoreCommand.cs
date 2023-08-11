@@ -10,6 +10,7 @@
 
     using CoresModels = ControlPisoMX.Cores.Models;
     using ProlecGE.ControlPisoMX.BFWeb.Components;
+    using Microsoft.Extensions.Configuration;
 
     public class TestIndustrialCoreCommand : IRequest<IndustrialCoreTestResultModel>
     {
@@ -29,7 +30,7 @@
             double watts,
             double coreTemperature,
             string? stationId,
-            string idSub)
+            string? idSub)
         {
             ItemId = itemId;
             Batch = batch;
@@ -77,7 +78,7 @@
 
         public string? StationId { get; set; }
         
-        public string IdSub { get; set; }
+        public string? IdSub { get; set; }
 
         #endregion
     }
@@ -87,16 +88,16 @@
         #region Fields
 
         private readonly ControlPisoMX.Cores.IMicroservice cores;
-        private readonly AppSettings _appSettings;
+        private readonly IConfiguration _configuration;
 
         #endregion
 
         #region Constructor
 
-        public TestIndustrialCoreCommandHandler(ControlPisoMX.Cores.IMicroservice cores, AppSettings _appSettings)
+        public TestIndustrialCoreCommandHandler(ControlPisoMX.Cores.IMicroservice cores, IConfiguration configuration)
         {
             this.cores = cores;
-            this._appSettings = _appSettings;
+            this._configuration = configuration;
         }
 
         #endregion
@@ -123,7 +124,7 @@
             //    request.StationId,
             //    cancellationToken);
 
-            CoresModels.IndustrialCoreTestResultModel testResult = _appSettings.AmbientERP ?
+            CoresModels.IndustrialCoreTestResultModel testResult = bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()) ?
                 await cores.TestIndustrialCoreAsync(
                request.ItemId,
                request.Batch,

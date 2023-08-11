@@ -50,6 +50,8 @@ namespace ProlecGE.ControlPisoMX.CoreSupply.Forms
 
             Form? mainform = null;
 
+            //args = new string[] { "AIS_A" }; //----->Para Forzar la pantalla de ManufacturingStatusForm
+
             if (args.Length > 0 && args[0] == "AIS_A")
             {
                 mainform = scope.ServiceProvider.GetRequiredService<ManufacturingStatusForm>();

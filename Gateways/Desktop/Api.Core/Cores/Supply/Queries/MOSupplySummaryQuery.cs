@@ -7,7 +7,7 @@
     using System.Threading.Tasks;
 
     using MediatR;
-
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
 
     using Models;
@@ -50,6 +50,7 @@
         private readonly ILogger<MOSupplySummaryQueryHandler> logger;
         private readonly ControlPisoMX.ERP.IMicroservice erp;
         private readonly ControlPisoMX.Cores.IMicroservice cores;
+        private readonly IConfiguration _configuration;
 
         #endregion
 
@@ -58,11 +59,13 @@
         public MOSupplySummaryQueryHandler(
             ILogger<MOSupplySummaryQueryHandler> logger,
             ControlPisoMX.ERP.IMicroservice erp,
-            ControlPisoMX.Cores.IMicroservice cores)
+            ControlPisoMX.Cores.IMicroservice cores,
+            IConfiguration configuration)
         {
             this.logger = logger;
             this.erp = erp;
             this.cores = cores;
+            this._configuration = configuration;
         }
 
         #endregion
@@ -73,8 +76,12 @@
         {
             try
             {
-                ERP.Models.ManufacturingOrderModel? manufacturingOrder = await erp
+                ERP.Models.ManufacturingOrderModel? manufacturingOrder = bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()) ? 
+                    await erp
                     .GetManufacturingOrderAsync(request.ItemId, request.Batch, cancellationToken)
+                    .ConfigureAwait(false)
+                    : await erp
+                    .GetManufacturingOrderAsync_sqlctp(request.ItemId, request.Batch, cancellationToken)
                     .ConfigureAwait(false);
 
                 if (manufacturingOrder == null)

@@ -41,8 +41,10 @@
         Task<IEnumerable<InsulationMachineModel>> GetMachinesAsync_sqlctp(CancellationToken cancellationToken);
 
         Task<IEnumerable<ManufacturingPlanItemModel>> GetManufacturingPlanByMachineAsync(DateTime date, string machine, CancellationToken cancellationToken);
+        Task<IEnumerable<ManufacturingPlanItemModel>> GetManufacturingPlanByMachineAsync_sqlctp(DateTime date, string machine, CancellationToken cancellationToken);
 
         Task<ManufacturingPlanItemModel?> GetManufacturingPlanBySerieAsync(string itemId, string batch, int serie, int sequence, CancellationToken cancellationToken);
+        Task<ManufacturingPlanItemModel?> GetManufacturingPlanBySerieAsync_sqlctp(string itemId, string batch, int serie, int sequence, CancellationToken cancellationToken);
 
         Task<IEnumerable<ManufacturingItemModel>> GetManufacturingOrdersAsync(CancellationToken cancellationToken);
 

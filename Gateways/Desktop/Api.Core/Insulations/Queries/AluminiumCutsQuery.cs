@@ -9,6 +9,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using ProlecGE.ControlPisoMX.BFWeb.Components;
+    using Microsoft.Extensions.Configuration;
 
     public class AluminiumCutsQuery : IRequest<IEnumerable<AluminiumCutModel>>
     {
@@ -34,18 +35,16 @@
         #region Fields
 
         private readonly ControlPisoMX.ERP.IMicroservice erp;
-        private readonly AppSettings _appSettings;
-        private readonly LN.ITtxpcf925Repository ln;
+        private readonly IConfiguration _configuration;
 
         #endregion
 
         #region Constructor
 
-        public AluminiumCutsQueryHandler(ControlPisoMX.ERP.IMicroservice erp, AppSettings _appSettings, LN.ITtxpcf925Repository ln)
+        public AluminiumCutsQueryHandler(ControlPisoMX.ERP.IMicroservice erp, IConfiguration configuration)
         {
             this.erp = erp;
-            this._appSettings = _appSettings;
-            this.ln = ln;
+            this._configuration = configuration;
         }
 
         #endregion
@@ -54,46 +53,24 @@
 
         public async Task<IEnumerable<AluminiumCutModel>> Handle(AluminiumCutsQuery request, CancellationToken cancellationToken)
         {
-            if (_appSettings.AmbientERP)
-            {
-                IEnumerable<ControlPisoMX.ERP.Models.AluminiumCutModel> items =
-                await erp.GetItemAluminiumCutsAsync(request.ItemId, cancellationToken).ConfigureAwait(false);
+            IEnumerable<ERP.Models.AluminiumCutModel> items = bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()) ?
+            await erp.GetItemAluminiumCutsAsync(request.ItemId, cancellationToken).ConfigureAwait(false) :
+            await erp.GetItemAluminiumCutsAsync_LN(request.ItemId,int.Parse(_configuration.GetSection("Cia").Value.ToString()), cancellationToken).ConfigureAwait(false);
 
-                return items
-                    .Select(item => new AluminiumCutModel()
-                    {
-                        DesignId = item.DesignId,
-                        Item = item.Item,
-                        Description = item.Description,
-                        Quantity = item.Quantity,
-                        L = item.L,
-                        A = item.A,
-                        B = item.B,
-                        T = item.T,
-                        Dimensions = item.Dimensions
-                    })
-                    .ToList();
-            }
-            else
-            {
-                IEnumerable<ProlecGE.ControlPisoMX.BFWeb.Components.Services.LN.Models.AluminiumCutModel> items =
-                await ln.GetItemAluminiumCutsAsync(_appSettings.cia, request.ItemId, cancellationToken).ConfigureAwait(false);
-
-                return items
-                    .Select(item => new AluminiumCutModel()
-                    {
-                        DesignId = item.DesignId,
-                        Item = item.Item,
-                        Description = item.Description,
-                        Quantity = item.Quantity,
-                        L = item.L,
-                        A = item.A,
-                        B = item.B,
-                        T = item.T,
-                        Dimensions = item.Dimensions
-                    })
-                    .ToList();
-            }
+            return items
+                .Select(item => new AluminiumCutModel()
+                {
+                    DesignId = item.DesignId,
+                    Item = item.Item,
+                    Description = item.Description,
+                    Quantity = item.Quantity,
+                    L = item.L,
+                    A = item.A,
+                    B = item.B,
+                    T = item.T,
+                    Dimensions = item.Dimensions
+                })
+                .ToList();
         }
 
         #endregion

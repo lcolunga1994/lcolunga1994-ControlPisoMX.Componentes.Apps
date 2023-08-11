@@ -7,7 +7,7 @@
     using System.Threading.Tasks;
 
     using MediatR;
-
+    using Microsoft.Extensions.Configuration;
     using Models;
 
     using ProlecGE.ControlPisoMX.BFWeb.Components.Cores;
@@ -40,6 +40,7 @@
 
         private readonly ControlPisoMX.Insulations.IMicroservice insulations;
         private readonly ControlPisoMX.Cores.IMicroservice cores;
+        private readonly IConfiguration _configuration;
 
         #endregion
 
@@ -47,10 +48,12 @@
 
         public CMSManufacturingStatusQueryHandler(
             ControlPisoMX.Insulations.IMicroservice insulations,
-            ControlPisoMX.Cores.IMicroservice cores)
+            ControlPisoMX.Cores.IMicroservice cores,
+            IConfiguration configuration)
         {
             this.insulations = insulations;
             this.cores = cores;
+            this._configuration = configuration;
         }
 
         #endregion
@@ -59,9 +62,10 @@
 
         public async Task<IEnumerable<MOManufacturingStatusModel>> Handle(MOAvailableToSupplyQuery request, CancellationToken cancellationToken)
         {
-            IEnumerable<ControlPisoMX.Insulations.Models.ManufacturingPlanItemModel> scheduledOrders = await insulations
-                    .GetManufacturingPlanByMachineAsync(request.Date, request.Machine, cancellationToken)
-                    .ConfigureAwait(false);
+            IEnumerable<ControlPisoMX.Insulations.Models.ManufacturingPlanItemModel> scheduledOrders = 
+                    bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()) ?
+                    await insulations.GetManufacturingPlanByMachineAsync(request.Date, request.Machine, cancellationToken).ConfigureAwait(false)
+                  : await insulations.GetManufacturingPlanByMachineAsync_sqlctp(request.Date, request.Machine, cancellationToken).ConfigureAwait(false);
 
             IEnumerable<ControlPisoMX.Cores.Models.ManufacturingOrders.MOSupplyItemModel> supplies = await cores
                 .GetSuppliesByScheduleAsync(request.Date, request.Machine)

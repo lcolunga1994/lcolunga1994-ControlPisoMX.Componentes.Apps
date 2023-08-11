@@ -7,7 +7,7 @@
     using AutoMapper;
 
     using MediatR;
-
+    using Microsoft.Extensions.Configuration;
     using Models;
 
     public class ItemAluminumTipsQuery : IRequest<AluminumTipPuntasModel?>
@@ -34,18 +34,16 @@
         #region Fields
 
         private readonly ControlPisoMX.ERP.IMicroservice erp;
-        private readonly AppSettings _appSettings;
-        private readonly LN.ITtxpcf925Repository ln;
+        private readonly IConfiguration _configuration;
 
         #endregion
 
         #region Constructor
 
-        public ItemAluminumTipsQueryHandler(ControlPisoMX.ERP.IMicroservice erp, AppSettings _appSettings, LN.ITtxpcf925Repository ln)
+        public ItemAluminumTipsQueryHandler(ControlPisoMX.ERP.IMicroservice erp, IConfiguration configuration)
         {
             this.erp = erp;
-            this._appSettings = _appSettings;
-            this.ln = ln;
+            this._configuration = configuration;
         }
 
         #endregion
@@ -54,63 +52,32 @@
 
         public async Task<AluminumTipPuntasModel?> Handle(ItemAluminumTipsQuery request, CancellationToken cancellationToken)
         {
-            if (_appSettings.AmbientERP)
+            ControlPisoMX.ERP.Models.AluminumTipPuntasModel? material = bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()) ?
+            await erp.GetItemAluminumTipsAsync(request.ItemId, cancellationToken).ConfigureAwait(false):
+            await erp.GetItemAluminumTipsAsync_LN(request.ItemId,int.Parse(_configuration.GetSection("Cia").Value.ToString()), cancellationToken).ConfigureAwait(false);
+            if (material == null)
             {
-                ControlPisoMX.ERP.Models.AluminumTipPuntasModel? material =
-                await erp.GetItemAluminumTipsAsync(request.ItemId, cancellationToken).ConfigureAwait(false);
-                if (material == null)
-                {
-                    return null;
-                }
-                else
-                {
-                    return new AluminumTipPuntasModel()
-                    {
-                        Materials = material.Materials.Select(e => new AluminumShearModel()
-                        {
-                            DesignId = e.DesignId,
-                            Item = e.Item,
-                            Description = e.Description,
-                            Quantity = e.Quantity,
-                            L = e.L,
-                            A = e.A,
-                            T = e.T,
-                            Dimensions = e.Dimensions
-                        }),
-                        PuntasIni = new AluminumTipModel() { BTE = material.PuntasIni.BTE, BTI = material.PuntasIni.BTI },
-                        PuntasFin = new AluminumTipModel() { BTE = material.PuntasFin.BTE, BTI = material.PuntasFin.BTI },
-                    };
-                }
+                return null;
             }
             else
             {
-                ProlecGE.ControlPisoMX.BFWeb.Components.Services.LN.Models.AluminumTipPuntasModel? material =
-                await ln.GetItemAluminumTipsAsync(_appSettings.cia, request.ItemId, cancellationToken).ConfigureAwait(false);
-                if (material == null)
+                return new AluminumTipPuntasModel()
                 {
-                    return null;
-                }
-                else
-                {
-                    return new AluminumTipPuntasModel()
+                    Materials = material.Materials.Select(e => new AluminumShearModel()
                     {
-                        Materials = material.Materials.Select(e => new AluminumShearModel()
-                        {
-                            DesignId = e.DesignId,
-                            Item = e.Item,
-                            Description = e.Description,
-                            Quantity = e.Quantity,
-                            L = e.L,
-                            A = e.A,
-                            T = e.T,
-                            Dimensions = e.Dimensions
-                        }),
-                        PuntasIni = new AluminumTipModel() { BTE = material.PuntasIni.BTE, BTI = material.PuntasIni.BTI },
-                        PuntasFin = new AluminumTipModel() { BTE = material.PuntasFin.BTE, BTI = material.PuntasFin.BTI },
-                    };
-                }
-
-            }
+                        DesignId = e.DesignId,
+                        Item = e.Item,
+                        Description = e.Description,
+                        Quantity = e.Quantity,
+                        L = e.L,
+                        A = e.A,
+                        T = e.T,
+                        Dimensions = e.Dimensions
+                    }),
+                    PuntasIni = new AluminumTipModel() { BTE = material.PuntasIni.BTE, BTI = material.PuntasIni.BTI },
+                    PuntasFin = new AluminumTipModel() { BTE = material.PuntasFin.BTE, BTI = material.PuntasFin.BTI },
+                };
+            }           
         }
 
         #endregion

@@ -22,7 +22,7 @@
             double watts,
             double coreTemperature,
             string? stationId,
-            string idSub)
+            string? idSub)
         {
             ItemId = itemId;
             Batch = batch;
@@ -81,7 +81,7 @@
         [StringLength(5)]
         public string? StationId { get; set; }
 
-        public string IdSub { get; set; }
+        public string? IdSub { get; set; }
 
         #endregion
     }

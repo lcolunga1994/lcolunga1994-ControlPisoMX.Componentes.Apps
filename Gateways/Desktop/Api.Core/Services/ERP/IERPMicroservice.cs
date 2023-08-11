@@ -13,6 +13,9 @@
         Task<ItemModel?> GetItemAsync(
             string itemId,
             CancellationToken cancellationToken);
+        Task<ItemModel?> GetItemAsync_discpiso(
+            string itemId,
+            CancellationToken cancellationToken);
 
         Task<ItemModel?> GetItemGeneralDataAsync(
             string itemId,
@@ -23,6 +26,7 @@
         #region Orders
 
         Task<ManufacturingOrderModel?> GetManufacturingOrderAsync(string itemId, string batch, CancellationToken cancellationToken);
+        Task<ManufacturingOrderModel?> GetManufacturingOrderAsync_sqlctp(string itemId, string batch, CancellationToken cancellationToken);
 
         Task<bool> GetManufacturingProgramValidationAsync(string itemId, string batch, CancellationToken cancellationToken);
 
@@ -36,15 +40,18 @@
             string designId,
             int coreSize,
             CancellationToken cancellationToken);
-        Task<ItemVoltageDesignModel?> GetItemVoltageDesignAsync_sqlctp(
-            string itemId,
-            string designId,
-            int coreSize,
-            CancellationToken cancellationToken);
+        Task<ItemVoltageDesignModel?> GetItemVoltageDesignAsync_LN(
+           string itemId,
+           string designId,
+           int coreSize,
+           int cia,
+           CancellationToken cancellationToken);
+
 
         #region Cores supply
 
         Task<Models.CoresSupply.CoreSupplyTagModel?> GetItemCoresSupplyTagDataAsync(string itemId, string batch, int serie);
+        Task<Models.CoresSupply.CoreSupplyTagModel?> GetItemCoresSupplyTagDataAsync_LN(string itemId, string batch, int serie, int cia);
 
         #endregion
 
@@ -66,6 +73,9 @@
         Task<IEnumerable<CartonShearModel>> GetItemCartonShearsAsync(
             string itemId,
             CancellationToken cancellationToken);
+        Task<IEnumerable<CartonShearModel>> GetItemCartonShearsAsync_LN(
+            string itemId,int cia,
+            CancellationToken cancellationToken);
         Task<IEnumerable<CartonShearModel>> GetItemCartonShearsAsync_sqlctp(
             string itemId,
             CancellationToken cancellationToken);
@@ -73,12 +83,18 @@
         Task<IEnumerable<GuillotineShearModel>> GetItemGuillotineShearsAsync(
            string itemId,
            CancellationToken cancellationToken);
+        Task<IEnumerable<GuillotineShearModel>> GetItemGuillotineShearsAsync_LN(
+            string itemId, int cia, 
+            CancellationToken cancellationToken);
         Task<IEnumerable<GuillotineShearModel>> GetItemGuillotineShearsAsync_sqlctp(
            string itemId,
            CancellationToken cancellationToken);
 
         Task<IEnumerable<SierraShearModel>> GetItemSierraShearsAsync(
             string itemId,
+            CancellationToken cancellationToken);
+        Task<IEnumerable<SierraShearModel>> GetItemSierraShearsAsync_LN(
+            string itemId,int cia,
             CancellationToken cancellationToken);
         Task<IEnumerable<SierraShearModel>> GetItemSierraShearsAsync_sqlctp(
             string itemId,
@@ -87,11 +103,16 @@
         Task<AluminumTipPuntasModel?> GetItemAluminumTipsAsync(
             string itemId,
             CancellationToken cancellationToken);
+        Task<AluminumTipPuntasModel?> GetItemAluminumTipsAsync_LN(
+            string itemId,int cia,
+            CancellationToken cancellationToken);
 
         Task<IEnumerable<AluminiumCutModel>> GetItemAluminiumCutsAsync(
             string itemId,
             CancellationToken cancellationToken);
-
+        Task<IEnumerable<AluminiumCutModel>> GetItemAluminiumCutsAsync_LN(
+            string itemId,int cia,
+            CancellationToken cancellationToken);
         #endregion
 
         #region Assembly
@@ -117,6 +138,7 @@
         #region Clamps
 
         Task<IEnumerable<ItemClampModel>> GetItemClampsAsync(string itemId, CancellationToken cancellationToken);
+        Task<IEnumerable<ItemClampModel>> GetItemClampsAsync_LN(string itemId, int cia, CancellationToken cancellationToken);
 
         Task<string> GetItemMarketAsync(string itemId, CancellationToken cancellationToken);
 

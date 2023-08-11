@@ -8,7 +8,7 @@
     using AutoMapper;
 
     using MediatR;
-
+    using Microsoft.Extensions.Configuration;
     using Models;
 
     public class SierraShearsQuery : IRequest<IEnumerable<SierraShearModel>>
@@ -35,18 +35,16 @@
         #region Fields
 
         private readonly ControlPisoMX.ERP.IMicroservice erp;
-        private readonly AppSettings _appSettings;
-        private readonly LN.ITtxpcf925Repository ln;
+        private readonly IConfiguration _configuration;
 
         #endregion
 
         #region Constructor
 
-        public SierraShearsQueryHandler(ControlPisoMX.ERP.IMicroservice erp, AppSettings _appSettings, LN.ITtxpcf925Repository ln)
+        public SierraShearsQueryHandler(ControlPisoMX.ERP.IMicroservice erp, IConfiguration configuration)
         {
             this.erp = erp;
-            this._appSettings = _appSettings;
-            this.ln = ln;
+            this._configuration = configuration;
         }
 
         #endregion
@@ -55,51 +53,26 @@
 
         public async Task<IEnumerable<SierraShearModel>> Handle(SierraShearsQuery request, CancellationToken cancellationToken)
         {
-            if (_appSettings.AmbientERP)
-            {
-                IEnumerable<ControlPisoMX.ERP.Models.SierraShearModel> items = await erp.GetItemSierraShearsAsync(request.ItemId, cancellationToken)
-                 .ConfigureAwait(false);
+            IEnumerable<ControlPisoMX.ERP.Models.SierraShearModel> items = bool.Parse(_configuration.GetSection("UseBaan").Value.ToString())?
+                await erp.GetItemSierraShearsAsync(request.ItemId, cancellationToken).ConfigureAwait(false) :
+                await erp.GetItemSierraShearsAsync_LN(request.ItemId,int.Parse(_configuration.GetSection("Cia").Value.ToString()), cancellationToken).ConfigureAwait(false);
 
-                return items
-                .Select(item => new SierraShearModel()
-                {
-                    DesignId = item.DesignId,
-                    Item = item.Item,
-                    Description = item.Description,
-                    Quantity = item.Quantity,
-                    L = item.L,
-                    A = item.A,
-                    B = item.B,
-                    Y = item.Y,
-                    T = item.T,
-                    Dimensions = item.Dimensions,
-                    Fold = item.Fold,
-                })
-                .ToList();
-            }
-            else
+            return items
+            .Select(item => new Models.SierraShearModel()
             {
-                IEnumerable<ProlecGE.ControlPisoMX.BFWeb.Components.Services.LN.Models.SierraShearModel> items =
-                    await ln.GetItemSierraShearsAsync(_appSettings.cia, request.ItemId, cancellationToken)
-                 .ConfigureAwait(false);
-
-                return items
-                .Select(item => new SierraShearModel()
-                {
-                    DesignId = item.DesignId,
-                    Item = item.Item,
-                    Description = item.Description,
-                    Quantity = item.Quantity,
-                    L = item.L,
-                    A = item.A,
-                    B = item.B,
-                    Y = item.Y,
-                    T = item.T,
-                    Dimensions = item.Dimensions,
-                    Fold = item.Fold,
-                })
-                .ToList();
-            }
+                DesignId = item.DesignId,
+                Item = item.Item,
+                Description = item.Description,
+                Quantity = item.Quantity,
+                L = item.L,
+                A = item.A,
+                B = item.B,
+                Y = item.Y,
+                T = item.T,
+                Dimensions = item.Dimensions,
+                Fold = item.Fold,
+            })
+            .ToList();
         }
 
         #endregion

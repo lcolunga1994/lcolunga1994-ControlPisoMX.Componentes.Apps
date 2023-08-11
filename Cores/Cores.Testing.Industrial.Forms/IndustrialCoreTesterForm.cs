@@ -37,7 +37,7 @@
                 string MessageTitle,
                 Exception? Exception)> messageBoxProgress;
         private readonly IMediator mediator;
-        private readonly IConfiguration configuration;
+        private readonly IConfiguration _configuration;
 
         #endregion
 
@@ -48,7 +48,7 @@
             InitializeComponent();
 
             this.mediator = mediator;
-            this.configuration = configuration;
+            this._configuration = configuration;
 
             messageBoxProgress = new Progress<(
                 MessageBoxIcon MessageBoxIcon,
@@ -325,7 +325,7 @@
 
                 if (needsCalibration)
                 {
-                    int calibrationTimeMinutes = configuration.GetValue<int>("CoreTests:CalibrationTimeMinutes");
+                    int calibrationTimeMinutes = _configuration.GetValue<int>("CoreTests:CalibrationTimeMinutes");
 
                     if (calibrationTimeMinutes == 0)
                     {
@@ -340,7 +340,7 @@
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
 
-                    CalibrationForm form = new(mediator, configuration);
+                    CalibrationForm form = new(mediator, _configuration);
 
                     form.ShowDialog();
 

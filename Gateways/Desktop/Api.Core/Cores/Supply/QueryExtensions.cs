@@ -4,7 +4,7 @@
     using System.Threading;
     using System.Threading.Tasks;
 
-    using ProlecGE.ControlPisoMX.Cores.Models.ManufacturingOrders;
+    using ProlecGE.ControlPisoMX.Cores.Models.ManufacturingOrders;    
 
     internal static class QueryExtensions
     {
@@ -41,5 +41,22 @@
 
             return printableAttributes;
         }
+        internal static async Task<List<MOPrintableAttributeModel>> GetMOPrintableAttributesAsync_LN(this ControlPisoMX.ERP.IMicroservice erp, string itemId, string batch, int serie,int cia)
+        {
+            List<MOPrintableAttributeModel> printableAttributes = new();
+
+            ERP.Models.CoresSupply.CoreSupplyTagModel? tagData = await erp
+                .GetItemCoresSupplyTagDataAsync_LN(itemId, batch, serie,cia)
+                .ConfigureAwait(false);
+
+            if (tagData != null)
+            {
+                printableAttributes.Add(new MOPrintableAttributeModel() { Attribute = "ScheduledEndDate", Value = tagData.ScheduledEndDate?.ToString("dd/MM/yyyy") });
+                printableAttributes.Add(new MOPrintableAttributeModel() { Attribute = "Strip", Value = tagData.Strip });
+                printableAttributes.Add(new MOPrintableAttributeModel() { Attribute = "Laps", Value = tagData.Laps });
+            }
+
+            return printableAttributes;
+        }        
     }
 }

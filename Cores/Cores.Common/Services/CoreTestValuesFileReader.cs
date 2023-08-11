@@ -17,7 +17,7 @@
 
         private bool isTimeOut = true;
         private System.Timers.Timer aTimer;
-        private readonly IConfiguration configuration;
+        private readonly IConfiguration _configuration;
         private string? outputFilePath = null;
 
         #endregion
@@ -26,7 +26,7 @@
 
         public CoreTestValuesFileReader(IConfiguration configuration)
         {
-            this.configuration = configuration;
+            this._configuration = configuration;
             aTimer = new System.Timers.Timer();
         }
 
@@ -40,10 +40,10 @@
 
             try
             {
-                string? coreTestFolderPath = configuration["CoreTests:FolderPath"];
-                string? inputFileName = configuration["CoreTests:InputFileName"];
+                string? coreTestFolderPath = _configuration["CoreTests:FolderPath"];
+                string? inputFileName = _configuration["CoreTests:InputFileName"];
                 string? inputFilePath = Path.Combine(coreTestFolderPath, inputFileName);
-                string? outputFileName = configuration["CoreTests:OutputFileName"];
+                string? outputFileName = _configuration["CoreTests:OutputFileName"];
 
                 outputFilePath = Path.Combine(coreTestFolderPath, outputFileName);
 
@@ -189,7 +189,7 @@
         {
             try
             {
-                int timerSeconds = configuration.GetValue<int>("CoreTests:CheckFileExistsTimerSeconds");
+                int timerSeconds = _configuration.GetValue<int>("CoreTests:CheckFileExistsTimerSeconds");
 
                 if (timerSeconds == 0)
                 {

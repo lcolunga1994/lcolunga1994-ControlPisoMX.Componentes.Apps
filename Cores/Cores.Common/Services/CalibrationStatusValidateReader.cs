@@ -13,7 +13,7 @@
     {
         #region Fields
 
-        private readonly IConfiguration configuration;
+        private readonly IConfiguration _configuration;
 
         #endregion
 
@@ -21,7 +21,7 @@
 
         public CalibrationStatusValidateReader(IConfiguration configuration)
         {
-            this.configuration = configuration;
+            this._configuration = configuration;
         }
 
         #endregion
@@ -34,8 +34,8 @@
 
             try
             {
-                string? dataCalibrationFolderPath = configuration["CoreTests:DataCalibrationFolderPath"];
-                string? lastTimeTestFileName = configuration["CoreTests:LastTimeTestFileName"];
+                string? dataCalibrationFolderPath = _configuration["CoreTests:DataCalibrationFolderPath"];
+                string? lastTimeTestFileName = _configuration["CoreTests:LastTimeTestFileName"];
 
                 if ((!string.IsNullOrWhiteSpace(dataCalibrationFolderPath))
                     && (!string.IsNullOrWhiteSpace(lastTimeTestFileName)))
@@ -53,7 +53,7 @@
                             {
                                 TimeSpan dateDiff = DateTime.UtcNow.Subtract(dateTime.ToUniversalTime());
 
-                                if (dateDiff.TotalMinutes > configuration.GetValue<int>("CoreTests:CalibrationTimeMinutes"))
+                                if (dateDiff.TotalMinutes > _configuration.GetValue<int>("CoreTests:CalibrationTimeMinutes"))
                                 {
                                     result = false;
                                 }

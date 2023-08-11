@@ -5,7 +5,7 @@
     using System.Threading.Tasks;
 
     using MediatR;
-
+    using Microsoft.Extensions.Configuration;
     using Models;
 
     using CoresModels = ControlPisoMX.Cores.Models;
@@ -62,14 +62,16 @@
         #region Fields
 
         private readonly ControlPisoMX.Cores.IMicroservice cores;
+        private readonly IConfiguration _configuration;
 
         #endregion
 
         #region Constructor
 
-        public TestIndustrialCorePatternCommandHandler(ControlPisoMX.Cores.IMicroservice cores)
+        public TestIndustrialCorePatternCommandHandler(ControlPisoMX.Cores.IMicroservice cores, IConfiguration configuration)
         {
             this.cores = cores;
+            this._configuration = configuration;
         }
 
         #endregion
@@ -78,7 +80,18 @@
 
         public async Task<IndustrialCoreTestResultModel> Handle(TestIndustrialCorePatternCommand request, CancellationToken cancellationToken)
         {
-            CoresModels.IndustrialCoreTestResultModel testResult = await cores.TestIndustrialCorePatternAsync(
+            CoresModels.IndustrialCoreTestResultModel testResult = (bool.Parse(_configuration.GetSection("UseBaan").Value.ToString())) ?
+                await cores.TestIndustrialCorePatternAsync(
+                request.TestCode,
+                request.AverageVoltage,
+                request.RMSVoltage,
+                request.Current,
+                request.Temperature,
+                request.Watts,
+                request.CoreTemperature,
+                request.StationId,
+                cancellationToken) :
+                await cores.TestIndustrialCorePatternAsync_sqlctp(
                 request.TestCode,
                 request.AverageVoltage,
                 request.RMSVoltage,

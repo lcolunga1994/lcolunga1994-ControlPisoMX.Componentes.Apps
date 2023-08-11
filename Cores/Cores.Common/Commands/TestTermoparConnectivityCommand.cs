@@ -16,7 +16,7 @@
         #region Fields
 
         private readonly ITemperatureReader temperatureReader;
-        private readonly IConfiguration configuration;
+        private readonly IConfiguration _configuration;
 
         #endregion
 
@@ -24,7 +24,7 @@
 
         public TestTermoparConnectivityCommandHandler(IConfiguration configuration, ITemperatureReader temperatureReader)
         {
-            this.configuration = configuration;
+            this._configuration = configuration;
             this.temperatureReader = temperatureReader;
         }
 
@@ -34,7 +34,7 @@
 
         public async Task<bool> Handle(TestTermoparConnectivityCommand request, CancellationToken cancellationToken)
         {
-            if (configuration.GetValue<bool>("DeviceIR:UseSerialPort"))
+            if (_configuration.GetValue<bool>("DeviceIR:UseSerialPort"))
             {
                 double coreTemperature = await temperatureReader
                     .ReadAsync(cancellationToken)

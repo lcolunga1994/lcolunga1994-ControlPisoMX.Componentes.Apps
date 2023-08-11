@@ -14,7 +14,7 @@
         #region Fields
 
         private readonly SerialPort _serialPort;
-        private readonly IConfiguration configuration;
+        private readonly IConfiguration _configuration;
         private bool isConnectedIR = false;
         private double temperature = -10d;
 
@@ -25,7 +25,7 @@
         public TemperatureReader(IConfiguration configuration)
         {
             _serialPort = new SerialPort();
-            this.configuration = configuration;
+            this._configuration = configuration;
         }
 
         #endregion
@@ -34,11 +34,11 @@
         
         public async Task<double> ReadAsync(CancellationToken cancellationToken)
         {
-            bool useSerialPort = configuration.GetValue<bool>("DeviceIR:UseSerialPort");
+            bool useSerialPort = _configuration.GetValue<bool>("DeviceIR:UseSerialPort");
 
             if (useSerialPort)
             {
-                string? serialPort = configuration.GetValue<string?>("DeviceIR:SerialPort");
+                string? serialPort = _configuration.GetValue<string?>("DeviceIR:SerialPort");
 
                 if (serialPort == null || string.IsNullOrWhiteSpace(serialPort))
                 {
@@ -72,7 +72,7 @@
 
             void ReadConfigFileAsync()
             {
-                string serialPort = configuration.GetValue<string>("DeviceIR:SerialPort");
+                string serialPort = _configuration.GetValue<string>("DeviceIR:SerialPort");
 
                 _serialPort.PortName = serialPort;
                 _serialPort.BaudRate = 9600;

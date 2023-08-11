@@ -7,6 +7,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using MediatR;
+    using Microsoft.Extensions.Configuration;
 
     public class RemoveClampCommand : IRequest
     {
@@ -40,14 +41,17 @@
         #region Fields
 
         private readonly ControlPisoMX.Cores.IMicroservice cores;
+        private readonly IConfiguration _configuration;
 
         #endregion
 
         #region Constructor
 
-        public RemoveClampCommandHandler(ControlPisoMX.Cores.IMicroservice cores)
+        public RemoveClampCommandHandler(ControlPisoMX.Cores.IMicroservice cores,
+            IConfiguration configuration)
         {
             this.cores = cores;
+            _configuration = configuration;
         }
 
         #endregion
@@ -56,8 +60,16 @@
 
         public async Task<Unit> Handle(RemoveClampCommand request, CancellationToken cancellationToken)
         {
-            await cores.RemoveClampOrderAsync(request.ItemId, request.Batch, request.Serie, request.Sequence, cancellationToken)
+            if(bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()))
+            {            
+                await cores.RemoveClampOrderAsync(request.ItemId, request.Batch, request.Serie, request.Sequence, cancellationToken)
                 .ConfigureAwait(false);
+            }
+            else
+            {
+                await cores.RemoveClampOrderAsync_sqlctp(request.ItemId, request.Batch, request.Serie, request.Sequence, cancellationToken)
+                .ConfigureAwait(false);
+            }
             return Unit.Value;
         }
 

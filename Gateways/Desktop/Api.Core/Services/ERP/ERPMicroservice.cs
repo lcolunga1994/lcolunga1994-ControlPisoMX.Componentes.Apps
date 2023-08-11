@@ -63,6 +63,33 @@
                     "ERPItem");
             }
         }
+        public async Task<ItemModel?> GetItemAsync_discpiso(
+            string itemId,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                logger.LogInformation($"Consultando el artículo '{itemId}'.");
+
+                return await GetAsync<ItemModel?>(
+                    $"items/item_discpiso/{itemId}",
+                    cancellationToken)
+                .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Ocurrió un error al consultar el artículo '{itemId}'.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    "No se puede consultar la información del artículo en este momento.",
+                    "ERPItem");
+            }
+        }
 
         public async Task<ItemModel?> GetItemGeneralDataAsync(
             string itemId,
@@ -203,6 +230,29 @@
                     "ManufacturingOrder");
             }
         }
+        public async Task<ManufacturingOrderModel?> GetManufacturingOrderAsync_sqlctp(string itemId, string batch, CancellationToken cancellationToken)
+        {
+            try
+            {
+                logger.LogInformation("Consultando orden de fabricación {itemId}-{batch}.", itemId, batch);
+
+                return await GetAsync<ManufacturingOrderModel>($"orders/manufacturing_sqlctp/{itemId}/{batch}", cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Ocurrió un error al consultar la orden de fabricación {itemId}-{batch}.", itemId, batch);
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    $"No se pueden consultar la orden de fabricación {itemId}-{batch}. en este momento.",
+                    "ManufacturingOrder");
+            }
+        }
 
         public async Task<bool> GetManufacturingProgramValidationAsync(string itemId, string batch, CancellationToken cancellationToken)
         {
@@ -262,18 +312,19 @@
                     "CoresVoltageDesign");
             }
         }
-        public async Task<ItemVoltageDesignModel?> GetItemVoltageDesignAsync_sqlctp(
-            string itemId,
-            string designId,
-            int coreSize,
-            CancellationToken cancellationToken)
+        public async Task<ItemVoltageDesignModel?> GetItemVoltageDesignAsync_LN(
+           string itemId,
+           string designId,
+           int coreSize,
+           int cia,
+           CancellationToken cancellationToken)
         {
             try
             {
                 logger.LogInformation($"Consultando los voltajes del artículo '{itemId}' - diseño '{designId}'.");
 
                 return await GetAsync<ItemVoltageDesignModel?>(
-                    $"cores/design/voltage_sqlctp/{itemId}/{designId}/{(int)coreSize}",
+                    $"cores/design/voltage_ln/{itemId}/{designId}/{(int)coreSize}/{cia}",
                     cancellationToken)
                 .ConfigureAwait(false);
             }
@@ -291,6 +342,7 @@
                     "CoresVoltageDesign");
             }
         }
+
 
         #region Cores supply
 
@@ -314,6 +366,26 @@
                     "ItemCoresSupplyTagData");
             }
         }
+        public async Task<CoreSupplyTagModel?> GetItemCoresSupplyTagDataAsync_LN(string itemId, string batch, int serie,int cia)
+        {
+            try
+            {
+                return (await GetAsync<CoreSupplyTagModel>($"custom/supplytag_ln/{itemId}/{batch}/{serie}/{cia}", CancellationToken.None)
+                    .ConfigureAwait(false));
+            }
+            catch (Exception ex)
+            {
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                logger.LogError(ex, "Ocurrió un error al consultar los valores para imprimir en la etiqueta de suministro de núcleos.");
+                throw CreateServiceException(
+                    $"No se pueden consultar los valores para imprimir en la etiqueta de suministro de núcleos en este momento.",
+                    "ItemCoresSupplyTagData");
+            }
+        }        
 
         #endregion
 
@@ -357,6 +429,31 @@
                 logger.LogInformation($"Consultando datos de materiales de Cizalla '{itemId}'.");
 
                 return (await GetAsync<IEnumerable<CartonShearModel>>($"insulations/cartonShears/{itemId}", cancellationToken)
+                    .ConfigureAwait(false)) ?? Enumerable.Empty<CartonShearModel>();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Ocurrió un error al consultar datos de los materiales de Cizalla'{itemId}'.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    "No se pueden consultar los datos de los materiales en este momento",
+                    "GetItemCartonShears");
+            }
+        }
+        public async Task<IEnumerable<CartonShearModel>> GetItemCartonShearsAsync_LN(
+           string itemId,int cia,
+           CancellationToken cancellationToken)
+        {
+            try
+            {
+                logger.LogInformation($"Consultando datos de materiales de Cizalla '{itemId}'.");
+
+                return (await GetAsync<IEnumerable<CartonShearModel>>($"insulations/cartonShears_ln/{itemId}/{cia}", cancellationToken)
                     .ConfigureAwait(false)) ?? Enumerable.Empty<CartonShearModel>();
             }
             catch (Exception ex)
@@ -422,6 +519,29 @@
                     "GetItemGuillotineShears");
             }
         }
+        public async Task<IEnumerable<GuillotineShearModel>> GetItemGuillotineShearsAsync_LN(string itemId,int cia, CancellationToken cancellationToken)
+        {
+            try
+            {
+                logger.LogInformation($"Consultando datos de materiales de la guillotina para el artículo '{itemId}'.");
+
+                return (await GetAsync<IEnumerable<GuillotineShearModel>>($"insulations/guillotineShears_ln/{itemId}/{cia}", cancellationToken)
+                    .ConfigureAwait(false)) ?? Enumerable.Empty<GuillotineShearModel>();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Ocurrió un error al consultar datos de los materiales de la guillotina para el artículo '{itemId}' en este momento.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    $"No se pueden consultar los datos de los materiales de la guillotina para el artículo '{itemId}' en este momento.",
+                    "GetItemGuillotineShears");
+            }
+        }
         public async Task<IEnumerable<GuillotineShearModel>> GetItemGuillotineShearsAsync_sqlctp(string itemId, CancellationToken cancellationToken)
         {
             try
@@ -453,6 +573,29 @@
                 logger.LogInformation($"Consultando datos de materiales de sierra para el artículo '{itemId}'.");
 
                 return (await GetAsync<IEnumerable<SierraShearModel>>($"insulations/sierraShears/{itemId}", cancellationToken)
+                    .ConfigureAwait(false)) ?? Enumerable.Empty<SierraShearModel>();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Ocurrió un error al consultar datos de los materiales de sierra para el artículo '{itemId}'.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    $"No se pueden consultar los datos de los materiales de sierra para el artículo '{itemId}' en este momento.",
+                    "ItemSierraShears");
+            }
+        }
+        public async Task<IEnumerable<SierraShearModel>> GetItemSierraShearsAsync_LN(string itemId,int cia, CancellationToken cancellationToken)
+        {
+            try
+            {
+                logger.LogInformation($"Consultando datos de materiales de sierra para el artículo '{itemId}'.");
+
+                return (await GetAsync<IEnumerable<SierraShearModel>>($"insulations/sierraShears_ln/{itemId}/{cia}", cancellationToken)
                     .ConfigureAwait(false)) ?? Enumerable.Empty<SierraShearModel>();
             }
             catch (Exception ex)
@@ -516,6 +659,29 @@
                     "ItemAluminumTips");
             }
         }
+        public async Task<AluminumTipPuntasModel?> GetItemAluminumTipsAsync_LN(string itemId,int cia, CancellationToken cancellationToken)
+        {
+            try
+            {
+                logger.LogInformation($"Consultando datos de materiales de soldadura de puntas de aluminio para el artículo '{itemId}'.");
+
+                return await GetAsync<AluminumTipPuntasModel?>($"insulations/aluminumShears_ln/{itemId}/{cia}", cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Ocurrió un error al consultar datos de los materiales de soldadura de puntas de aluminio para el artículo '{itemId}'.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    $"No se pueden consultar los datos de los materiales de soldadura de puntas de aluminio para el artículo '{itemId}' en este momento.",
+                    "ItemAluminumTips");
+            }
+        }
 
         public async Task<IEnumerable<AluminiumCutModel>> GetItemAluminiumCutsAsync(string itemId, CancellationToken cancellationToken)
         {
@@ -540,7 +706,29 @@
                     "ItemAluminiumCuts");
             }
         }
+        public async Task<IEnumerable<AluminiumCutModel>> GetItemAluminiumCutsAsync_LN(string itemId,int cia, CancellationToken cancellationToken)
+        {
+            try
+            {
+                logger.LogInformation($"Consultando datos de materiales de cortes de aluminio para el artículo '{itemId}'.");
 
+                return (await GetAsync<IEnumerable<AluminiumCutModel>>($"insulations/aluminiumCuts_ln/{itemId}/{cia}", cancellationToken)
+                    .ConfigureAwait(false)) ?? Enumerable.Empty<AluminiumCutModel>();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Ocurrió un error al consultar datos de cortes de puntas de aluminio para el artículo '{itemId}'.");
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    $"No se pueden consultar los datos de los materiales de cortes de aluminio para el artículo '{itemId}' en este momento.",
+                    "ItemAluminiumCuts");
+            }
+        }
         public async Task<string?> GetItemDimensionsAsync(string itemId, CancellationToken cancellationToken)
         {
             try
@@ -685,6 +873,29 @@
                 logger.LogInformation("Consultando los herrajes del artículo '{itemId}'.", itemId);
 
                 return (await GetAsync<IEnumerable<ItemClampModel>>($"clamps/{itemId}", cancellationToken)
+                    .ConfigureAwait(false)) ?? Enumerable.Empty<ItemClampModel>();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Ocurrió un error al consultar los herrajes del artículo '{itemId}'.", itemId);
+
+                if (ex is UserException)
+                {
+                    throw;
+                }
+
+                throw CreateServiceException(
+                    $"No se pueden consultar los herrajes del artículo '{itemId}' en este momento.",
+                    "ItemClamps");
+            }
+        }
+        public async Task<IEnumerable<ItemClampModel>> GetItemClampsAsync_LN(string itemId,int cia, CancellationToken cancellationToken)
+        {
+            try
+            {
+                logger.LogInformation("Consultando los herrajes del artículo '{itemId}'.", itemId);
+
+                return (await GetAsync<IEnumerable<ItemClampModel>>($"clamps/{itemId}/{cia}", cancellationToken)
                     .ConfigureAwait(false)) ?? Enumerable.Empty<ItemClampModel>();
             }
             catch (Exception ex)

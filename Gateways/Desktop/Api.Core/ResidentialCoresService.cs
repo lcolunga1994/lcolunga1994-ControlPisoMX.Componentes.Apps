@@ -17,6 +17,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using ProlecGE.ControlPisoMX.BFWeb.Components;
+    using Microsoft.Extensions.Configuration;
 
     public class ResidentialCoresService : IResidentialCoresService
     {
@@ -25,7 +26,7 @@
         private readonly IServiceProvider serviceProvider;
         private readonly IMediator mediator;
         private readonly ILogger<ResidentialCoresService> logger;
-        private readonly AppSettings _appSettings;
+        private readonly IConfiguration _configuration;
 
         #endregion
 
@@ -35,12 +36,12 @@
             IServiceProvider serviceProvider,
             IMediator mediator,
             ILogger<ResidentialCoresService> logger,
-            AppSettings appSettings)
+            IConfiguration configuration)
         {
             this.serviceProvider = serviceProvider;
             this.mediator = mediator;
             this.logger = logger;
-            _appSettings = appSettings;
+            _configuration = configuration;
         }
 
         #endregion
@@ -95,7 +96,7 @@
 
                 ControlPisoMX.Cores.IMicroservice cores = serviceProvider.GetRequiredService<ControlPisoMX.Cores.IMicroservice>();
 
-                IEnumerable<ControlPisoMX.Cores.Models.DateRangeAvailableModel> dateRangeAvailable = _appSettings.AmbientERP ?
+                IEnumerable<ControlPisoMX.Cores.Models.DateRangeAvailableModel> dateRangeAvailable = bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()) ?
                     await cores.GetDateRangeAvailableForTestQueryAsync()
                     .ConfigureAwait(false)
                     : await cores.GetDateRangeAvailableForTestQueryAsync_discpiso()
@@ -141,7 +142,7 @@
 
                 ControlPisoMX.Cores.IMicroservice cores = serviceProvider.GetRequiredService<ControlPisoMX.Cores.IMicroservice>();
 
-                ControlPisoMX.Cores.QueryResult<string> items = _appSettings.AmbientERP ?
+                ControlPisoMX.Cores.QueryResult<string> items = bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()) ?
                     await cores.GetItemsPlannedToBeTestedAsync(page, pageSize, cancellationToken)
                     .ConfigureAwait(false)
                     : await cores.GetItemsPlannedToBeTestedAsync_discpiso(page, pageSize, cancellationToken)
@@ -164,6 +165,25 @@
                 ControlPisoMX.Cores.IMicroservice cores = serviceProvider.GetRequiredService<ControlPisoMX.Cores.IMicroservice>();
 
                 ControlPisoMX.Cores.QueryResult<string> items = await cores.GetItemsPlannedToBeTestedAsync_discpiso(page, pageSize, cancellationToken)
+                    .ConfigureAwait(false);
+
+                return new Cores.QueryResult<string>(items.Data, items.Count);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "{message}", $"Ocurrió un error al consultar los artículos planeados para la fabricación de núcleos: página:{page} tamaño:{pageSize}.");
+                throw;
+            }
+        }
+        public async Task<Cores.QueryResult<string>> GetItemsPlannedToBeManufacturedAsync_discpiso_AMO(int page, int pageSize, CancellationToken cancellationToken)
+        {
+            try
+            {
+                logger.LogInformation("{message}", $"Consultando los artículos planeados para la fabricación de núcleos: página:{page} tamaño:{pageSize}.");
+
+                ControlPisoMX.Cores.IMicroservice cores = serviceProvider.GetRequiredService<ControlPisoMX.Cores.IMicroservice>();
+
+                ControlPisoMX.Cores.QueryResult<string> items = await cores.GetItemsPlannedToBeTestedAsync_discpiso_AMO(page, pageSize, cancellationToken)
                     .ConfigureAwait(false);
 
                 return new Cores.QueryResult<string>(items.Data, items.Count);
@@ -205,6 +225,24 @@
                 ControlPisoMX.Cores.IMicroservice cores = serviceProvider.GetRequiredService<ControlPisoMX.Cores.IMicroservice>();
 
                 return await mediator.Send(new NextItemSequenceInPlanQuery(itemId), CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(
+                    ex,
+                    "{message}", $"Ocurrió un error al consultar el plan de fabricación  del artículo '{itemId}'.");
+                throw;
+            }
+        }
+        public async Task<CoreManufacturingPlanModel?> GetNextCoreToBeManufacturedAsync_AMO(string itemId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                logger.LogInformation("{message}", $"Consultando el plan de fabricación del artículo '{itemId}'.");
+
+                ControlPisoMX.Cores.IMicroservice cores = serviceProvider.GetRequiredService<ControlPisoMX.Cores.IMicroservice>();
+
+                return await mediator.Send(new NextItemSequenceInPlanQuery_AMO(itemId), CancellationToken.None);
             }
             catch (Exception ex)
             {
@@ -317,7 +355,7 @@
         {
             try
             {
-                return _appSettings.AmbientERP ? await mediator.Send(new ResidentialCoreTestQuery(testCode), CancellationToken.None)
+                return bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()) ? await mediator.Send(new ResidentialCoreTestQuery(testCode), CancellationToken.None)
                      : await mediator.Send(new ResidentialCoreTestQuery_discpiso(testCode), CancellationToken.None);
             }
             catch (Exception ex)
@@ -404,6 +442,58 @@
 
                 return await mediator.Send(
                     new Cores.Commands.TestResidentialCoreCommand(
+                        tag,
+                        itemId,
+                        coreSize,
+                        averageVoltage,
+                        rmsVoltage,
+                        current,
+                        temperature,
+                        watts,
+                        coreTemperature,
+                        testCode,
+                        stationId),
+                    cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "{message}", $"Ocurrió un error al probar el núcleo con el artículo '{itemId}'.");
+                throw;
+            }
+        }
+
+        public async Task<ResidentialCoreTestResultModel> TestResidentialCoreAsync_AMO(
+            string? tag,
+            string itemId,
+            int coreSize,
+            double averageVoltage,
+            double rmsVoltage,
+            double current,
+            double temperature,
+            double watts,
+            double coreTemperature,
+            string testCode,
+            string? stationId,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                System.Text.StringBuilder stringBuilder = new($"Probando núcleo con el artículo '{itemId}':");
+                stringBuilder.AppendLine($"Tamaño dona: {coreSize}");
+                stringBuilder.AppendLine($"Etiqueta: {tag}");
+                stringBuilder.AppendLine($"Código: {testCode}");
+                stringBuilder.AppendLine($"Tensión media: {averageVoltage}");
+                stringBuilder.AppendLine($"Tensión eficaz: {rmsVoltage}");
+                stringBuilder.AppendLine($"Corriente: {current}");
+                stringBuilder.AppendLine($"Temperatura: {temperature}");
+                stringBuilder.AppendLine($"Watts: {watts}");
+                stringBuilder.AppendLine($"Temperatura Termopar: {coreTemperature}");
+
+                logger.LogInformation("{message}", stringBuilder.ToString());
+
+                return await mediator.Send(
+                    new Cores.Commands.TestResidentialCoreCommand_AMO(
                         tag,
                         itemId,
                         coreSize,
@@ -555,8 +645,9 @@
             {
                 ProlecGE.ControlPisoMX.Insulations.IMicroservice insulations = serviceProvider.GetRequiredService<ProlecGE.ControlPisoMX.Insulations.IMicroservice>();
 
-                return (await insulations.GetMachinesAsync(cancellationToken)
-                    .ConfigureAwait(false))
+                return (bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()) ? 
+                      await insulations.GetMachinesAsync(cancellationToken).ConfigureAwait(false)
+                    : await insulations.GetMachinesAsync_sqlctp(cancellationToken).ConfigureAwait(false))
                     .Select(e => new InsulationMachineModel(e.Number, e.Available))
                     .ToArray();
             }
@@ -600,10 +691,17 @@
                 logger.LogInformation("{message}", $"Agregando suministro de núcleo -{supply.ItemId}-{supply.Batch}-{supply.Serie}-{supply.TestCode}.");
 
                 ControlPisoMX.Cores.IMicroservice cores = serviceProvider.GetRequiredService<ControlPisoMX.Cores.IMicroservice>();
-
-                await cores.AddSupplyCoreAsync(new ControlPisoMX.Cores.Models.Residential.AddSupplyCoreModel(supply.ItemId, supply.Batch,
+                if(bool.Parse(_configuration.GetSection("UseBaan").Value.ToString())) { 
+                     await cores.AddSupplyCoreAsync(new ControlPisoMX.Cores.Models.Residential.AddSupplyCoreModel(supply.ItemId, supply.Batch,
                                     supply.Serie, supply.TestCode, supply.User), cancellationToken)
-                .ConfigureAwait(false);
+                    .ConfigureAwait(false);
+                }
+                else 
+                { 
+                    await cores.AddSupplyCoreAsync_sqlctp(new ControlPisoMX.Cores.Models.Residential.AddSupplyCoreModel(supply.ItemId, supply.Batch,
+                                    supply.Serie, supply.TestCode, supply.User), cancellationToken)
+                    .ConfigureAwait(false);
+                }
 
             }
             catch (Exception ex)
@@ -624,8 +722,17 @@
 
                 ControlPisoMX.Cores.IMicroservice cores = serviceProvider.GetRequiredService<ControlPisoMX.Cores.IMicroservice>();
 
-                await cores.RemoveSupplyCoreAsync(id, cancellationToken)
+                
+                if(bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()))
+                {
+                    await cores.RemoveSupplyCoreAsync(id, cancellationToken)
                 .ConfigureAwait(false);
+                }
+                else
+                {
+                    await cores.RemoveSupplyCoreAsync_sqlctp(id, cancellationToken)
+                .ConfigureAwait(false);
+                }
             }
             catch (Exception ex)
             {

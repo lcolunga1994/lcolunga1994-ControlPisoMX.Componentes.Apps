@@ -75,7 +75,7 @@
 
         public string? StationId { get; }
 
-        public string IdSub { get; }
+        public string? IdSub { get; }
 
         #endregion
     }

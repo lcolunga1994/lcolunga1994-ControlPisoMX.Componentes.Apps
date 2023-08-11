@@ -4,7 +4,7 @@
     using System.Threading.Tasks;
 
     using MediatR;
-
+    using Microsoft.Extensions.Configuration;
     using Models;
 
     public class IndustrialCorePatternQuery : IRequest<IndustrialCorePatternModel>

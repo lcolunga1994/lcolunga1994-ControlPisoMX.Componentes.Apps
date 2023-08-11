@@ -8,6 +8,7 @@
 
     using Residential.Models;
     using ProlecGE.ControlPisoMX.BFWeb.Components;
+    using Microsoft.Extensions.Configuration;
 
     public class NextItemSequenceInPlanQuery : IRequest<CoreManufacturingPlanModel?>
     {
@@ -39,7 +40,7 @@
 
         private readonly ControlPisoMX.Cores.IMicroservice cores;
         private readonly ControlPisoMX.I40.IMicroservice i40;
-        private readonly AppSettings _appSettings;
+        private readonly IConfiguration _configuration;
 
         #endregion
 
@@ -48,11 +49,11 @@
         public NextItemSequenceInPlanQueryHandler(
             ControlPisoMX.Cores.IMicroservice cores,
             ControlPisoMX.I40.IMicroservice i40,
-            AppSettings appSettings)
+            IConfiguration configuration)
         {
             this.cores = cores;
             this.i40 = i40;
-            _appSettings = appSettings;
+            _configuration = configuration;
         }
 
         #endregion
@@ -63,7 +64,7 @@
             NextItemSequenceInPlanQuery request,
             CancellationToken cancellationToken)
         {
-            ControlPisoMX.Cores.Models.CoreManufacturingPlanItemModel? nextManufacturingPlan = _appSettings.AmbientERP ?
+            ControlPisoMX.Cores.Models.CoreManufacturingPlanItemModel? nextManufacturingPlan = bool.Parse(_configuration.GetSection("UseBaan").Value.ToString()) ?
                 await cores
                     .GetNextItemSequenceInPlanAsync(request.ItemId, CancellationToken.None)
                     .ConfigureAwait(false)
